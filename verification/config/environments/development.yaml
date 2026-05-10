@@ -1,0 +1,291 @@
+# Development Environment Configuration
+# Optimized settings for development, testing, and debugging
+
+# ===== DEVELOPMENT-SPECIFIC OVERRIDES =====
+
+# Inherit from base configuration and override specific settings
+base_config: "../verification_config.yaml"
+
+# ===== RELAXED VERIFICATION THRESHOLDS =====
+
+price_accuracy:
+  tolerance_percent: 2.0  # More lenient for testing (±2%)
+  critical_threshold_percent: 50.0  # Higher threshold for critical issues
+  
+  # Development-friendly settings
+  fuzzy_matching_enabled: true
+  allow_test_data: true
+  
+  # Relaxed severity thresholds
+  severity_thresholds:
+    minor: 10.0   # 0-10% deviation = minor
+    major: 25.0   # 10-25% deviation = major  
+    critical: 50.0 # >50% deviation = critical
+
+policy_authenticity:
+  # Allow test policies in development
+  allow_test_policies: true
+  require_strict_citations: false
+  
+  # Additional forbidden phrases for testing
+  forbidden_phrases:
+    test_phrases:
+      - "test policy"
+      - "development only"
+      - "placeholder text"
+
+topic_relevance:
+  min_coverage_ratio: 0.6  # Lower threshold for testing (60%)
+  
+  # More lenient empathy requirements
+  empathy_detection:
+    enabled: true
+    bonus_points: 0.15  # Higher bonus in dev
+    required_phrases:
+      test_phrases:
+        - "test empathy"
+        - "development response"
+
+# ===== DEVELOPMENT WORKFLOW SETTINGS =====
+
+workflow:
+  execution:
+    max_execution_time_seconds: 600  # 10 minutes for debugging
+    enable_persistence: true
+    enable_checkpoints: true
+    checkpoint_interval_seconds: 15  # More frequent checkpoints
+    
+  # Enhanced debugging features
+  debugging:
+    enabled: true
+    save_intermediate_states: true
+    detailed_error_traces: true
+    step_by_step_logging: true
+
+# ===== DEVELOPMENT NODE CONFIGURATION =====
+
+nodes:
+  research_node:
+    timeout_seconds: 120  # Longer timeout for debugging
+    retry_attempts: 3
+    
+    settings:
+      enable_debug_mode: true
+      save_tool_outputs: true
+      detailed_reasoning_logs: true
+      
+  verification_node:
+    timeout_seconds: 60
+    retry_attempts: 2
+    
+    settings:
+      parallel_checks: false  # Sequential for easier debugging
+      early_termination_enabled: false  # Complete all checks
+      save_verification_details: true
+      
+  correction_node:
+    timeout_seconds: 90
+    retry_attempts: 2
+    
+    settings:
+      generate_detailed_feedback: true
+      include_debug_suggestions: true
+      save_correction_history: true
+
+# ===== DEVELOPMENT PERFORMANCE SETTINGS =====
+
+performance:
+  # Relaxed performance requirements
+  verification_timeout_seconds: 60
+  individual_check_timeout_seconds: 20
+  
+  # Enhanced caching for development
+  caching:
+    enabled: true
+    ttl_seconds: 1800  # 30 minutes
+    max_entries: 500
+    cache_debug_data: true
+    
+  # Development-specific optimizations
+  optimization:
+    enable_profiling: true
+    track_memory_usage: true
+    save_performance_reports: true
+
+# ===== DEVELOPMENT RETRY SETTINGS =====
+
+retry_settings:
+  max_retries: 5  # More retries for testing
+  retry_backoff_seconds: 0.5  # Faster retries
+  exponential_backoff: false
+  
+  # Development retry conditions
+  retry_on_timeout: true
+  retry_on_api_error: true
+  retry_on_db_error: true
+  retry_on_validation_error: true  # Extra retry condition
+
+# ===== ENHANCED LOGGING FOR DEVELOPMENT =====
+
+logging:
+  level: DEBUG
+  detailed_verification_logs: true
+  log_verification_reasoning: true
+  log_performance_metrics: true
+  
+  # Development-specific logging
+  development_logging:
+    log_all_llm_calls: true
+    log_state_transitions: true
+    log_prompt_templates: true
+    log_api_responses: true
+    save_logs_to_file: true
+    
+  # Structured logging with extra fields
+  include_fields:
+    - timestamp
+    - verification_id
+    - objection_summary
+    - verification_result
+    - execution_time
+    - issues_found
+    - debug_info
+    - memory_usage
+    - api_call_count
+
+# ===== DEVELOPMENT MONITORING =====
+
+monitoring:
+  metrics_enabled: true
+  export_interval_seconds: 30  # More frequent exports
+  
+  # Enhanced metrics for development
+  tracked_metrics:
+    - verification_success_rate
+    - average_verification_time
+    - critical_issues_per_hour
+    - retry_rate
+    - escalation_rate
+    - api_call_frequency
+    - memory_usage_trend
+    - cache_hit_rate
+    
+  # Development alerts
+  alerts:
+    enabled: true
+    alert_on_high_retry_rate: true
+    alert_on_performance_degradation: true
+    alert_threshold_retry_rate: 0.5  # 50% retry rate
+
+# ===== DEVELOPMENT TESTING SUPPORT =====
+
+testing:
+  # Test data configuration
+  test_data:
+    use_mock_database: true
+    mock_policy_documents: true
+    generate_test_objections: true
+    
+  # Test scenarios
+  test_scenarios:
+    price_accuracy_tests:
+      - scenario: "exact_price_match"
+        expected_result: "pass"
+      - scenario: "minor_price_deviation"
+        expected_result: "pass"
+      - scenario: "major_price_deviation"
+        expected_result: "fail"
+        
+    policy_authenticity_tests:
+      - scenario: "valid_policy_citation"
+        expected_result: "pass"
+      - scenario: "fabricated_policy"
+        expected_result: "fail"
+        
+    topic_relevance_tests:
+      - scenario: "perfect_relevance"
+        expected_result: "pass"
+      - scenario: "partial_relevance"
+        expected_result: "conditional"
+      - scenario: "irrelevant_response"
+        expected_result: "fail"
+
+# ===== DEVELOPMENT API SETTINGS =====
+
+api_settings:
+  # LLM API configuration for development
+  llm:
+    model_name: "gpt-4"  # Use consistent model for testing
+    temperature: 0.0  # Deterministic results for testing
+    max_tokens: 3000
+    timeout_seconds: 60
+    
+  # Rate limiting for development
+  rate_limiting:
+    enabled: false  # Disable for faster testing
+    requests_per_minute: 1000
+    
+  # API debugging
+  debugging:
+    log_api_requests: true
+    log_api_responses: true
+    save_api_call_history: true
+
+# ===== DEVELOPMENT SECURITY SETTINGS =====
+
+security:
+  # Relaxed security for development
+  input_validation:
+    strict_validation: false
+    allow_test_inputs: true
+    max_objection_length: 10000  # Larger for testing
+    
+  # Development authentication
+  authentication:
+    require_api_key: false
+    allow_localhost: true
+    enable_debug_endpoints: true
+
+# ===== DEVELOPMENT DATABASE SETTINGS =====
+
+database:
+  # Development database configuration
+  connection:
+    host: "localhost"
+    port: 5432
+    database: "verification_dev"
+    use_connection_pooling: false  # Simpler for debugging
+    
+  # Development query settings
+  queries:
+    timeout_seconds: 30
+    enable_query_logging: true
+    use_test_data: true
+    
+  # Development data management
+  data_management:
+    auto_create_test_data: true
+    reset_data_on_startup: false
+    backup_before_tests: true
+
+# ===== DEVELOPMENT NOTIFICATION SETTINGS =====
+
+notifications:
+  # Development notification configuration
+  enabled: true
+  channels:
+    - console
+    - file
+    - webhook  # For development tools integration
+    
+  # Notification levels
+  levels:
+    escalation: "info"  # Lower priority in dev
+    critical_issue: "warning"
+    performance_alert: "info"
+    
+  # Development-specific notifications
+  development_notifications:
+    notify_on_test_completion: true
+    notify_on_performance_milestone: true
+    notify_on_new_issue_pattern: true

@@ -1,0 +1,40 @@
+# Existing dependencies
+rank-bm25
+hypothesis
+tavily-python
+llama-index-tools-tavily-research
+
+# LangGraph StateGraph workflow orchestration
+langgraph>=0.0.40
+
+# Pydantic for data validation and serialization
+pydantic>=2.0.0
+
+# Async I/O support
+aiofiles>=23.0.0
+aiohttp>=3.8.0
+
+# LLM integration and agent framework
+llama-index>=0.9.0
+llama-index-llms-openai
+llama-index-llms-anthropic
+
+# Vector database for policy/product lookup
+chromadb>=0.4.0
+
+# Additional utilities for verification agent
+python-dateutil>=2.8.0
+typing-extensions>=4.5.0
+
+# Performance and caching
+redis>=4.5.0
+asyncio-throttle>=1.0.0
+
+# Logging and monitoring
+structlog>=23.0.0
+prometheus-client>=0.16.0
+
+# Testing dependencies for property-based testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.10.0

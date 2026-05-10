@@ -1,0 +1,168 @@
+# Test Environment Configuration
+# Minimal configuration for unit testing and CI/CD
+
+# ===== TEST-SPECIFIC OVERRIDES =====
+
+# Inherit from base configuration
+base_config: "../verification_config.yaml"
+
+# ===== MINIMAL VERIFICATION THRESHOLDS =====
+
+price_accuracy:
+  tolerance_percent: 5.0  # Very lenient for testing
+  critical_threshold_percent: 100.0  # Disable critical issues
+  
+  # Test-friendly settings
+  fuzzy_matching_enabled: true
+  allow_test_data: true
+  
+  # Disable strict validation for tests
+  validation_rules:
+    require_product_code_match: false
+    validate_promotional_pricing: false
+    check_price_history: false
+
+policy_authenticity:
+  # Allow mock policies for testing
+  citation_required: false
+  require_strict_citations: false
+  allow_test_policies: true
+  
+  # Minimal forbidden phrases for testing
+  forbidden_phrases:
+    test_only:
+      - "test_fabricated_policy"
+
+topic_relevance:
+  min_coverage_ratio: 0.3  # Very low threshold for testing
+  
+  # Disable empathy requirements for testing
+  empathy_detection:
+    enabled: false
+
+# ===== TEST WORKFLOW SETTINGS =====
+
+workflow:
+  execution:
+    max_execution_time_seconds: 30  # Fast execution for tests
+    enable_persistence: false  # No persistence in tests
+    enable_checkpoints: false
+    
+  # Test-specific debugging
+  debugging:
+    enabled: false
+    save_intermediate_states: false
+
+# ===== TEST NODE CONFIGURATION =====
+
+nodes:
+  research_node:
+    timeout_seconds: 10
+    retry_attempts: 1
+    
+  verification_node:
+    timeout_seconds: 5
+    retry_attempts: 1
+    
+    settings:
+      parallel_checks: false  # Sequential for deterministic tests
+      early_termination_enabled: false
+      
+  correction_node:
+    timeout_seconds: 5
+    retry_attempts: 1
+
+# ===== TEST PERFORMANCE SETTINGS =====
+
+performance:
+  verification_timeout_seconds: 10
+  individual_check_timeout_seconds: 3
+  
+  # Disable caching for tests
+  caching:
+    enabled: false
+    
+  # Minimal optimization for tests
+  optimization:
+    enable_profiling: false
+    track_memory_usage: false
+
+# ===== TEST RETRY SETTINGS =====
+
+retry_settings:
+  max_retries: 1  # Minimal retries for fast tests
+  retry_backoff_seconds: 0.1
+  exponential_backoff: false
+
+# ===== MINIMAL LOGGING FOR TESTS =====
+
+logging:
+  level: ERROR  # Minimal logging for clean test output
+  detailed_verification_logs: false
+  log_verification_reasoning: false
+  log_performance_metrics: false
+  
+  # Test logging settings
+  test_logging:
+    log_to_console: false
+    log_to_file: false
+
+# ===== DISABLED MONITORING FOR TESTS =====
+
+monitoring:
+  metrics_enabled: false
+  export_interval_seconds: 3600  # Very infrequent
+  
+  # Disable alerts for tests
+  alerts:
+    enabled: false
+
+# ===== TEST SECURITY SETTINGS =====
+
+security:
+  # Relaxed security for testing
+  input_validation:
+    strict_validation: false
+    allow_test_inputs: true
+    max_objection_length: 1000
+    
+  # No authentication for tests
+  authentication:
+    require_api_key: false
+    
+  # No rate limiting for tests
+  rate_limiting:
+    enabled: false
+
+# ===== TEST API SETTINGS =====
+
+api_settings:
+  # Mock LLM for testing
+  llm:
+    model_name: "mock-gpt-4"
+    temperature: 0.0  # Deterministic for tests
+    max_tokens: 500
+    timeout_seconds: 5
+    
+  # No rate limiting for tests
+  rate_limiting:
+    enabled: false
+
+# ===== TEST DATABASE SETTINGS =====
+
+database:
+  # In-memory database for tests
+  connection:
+    use_in_memory: true
+    use_connection_pooling: false
+    
+  # Fast queries for tests
+  queries:
+    timeout_seconds: 1
+    enable_query_logging: false
+    use_test_data: true
+
+# ===== DISABLED NOTIFICATIONS FOR TESTS =====
+
+notifications:
+  enabled: false

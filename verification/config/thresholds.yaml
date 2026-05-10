@@ -1,0 +1,325 @@
+# Verification Thresholds Configuration
+# Configurable thresholds cho critical/major/minor issue classification
+# Supports Task 1.3.1: Design verification thresholds config
+
+# ===== PRICE ACCURACY THRESHOLDS =====
+price_accuracy:
+  # Deviation percentage thresholds for severity classification
+  thresholds:
+    minor_threshold_percent: 5.0    # 0-5% deviation = minor issue
+    major_threshold_percent: 15.0   # 5-15% deviation = major issue  
+    critical_threshold_percent: 30.0 # >30% deviation = critical issue
+  
+  # Pass/fail criteria
+  pass_criteria:
+    tolerance_percent: 1.0          # ±1% tolerance for PASS
+    require_exact_currency: false   # Allow currency variations
+    allow_promotional_pricing: true # Allow promotional discounts
+    max_promotional_discount: 20.0  # Maximum promotional discount %
+  
+  # Special case handling
+  special_cases:
+    missing_price_severity: "major"        # When price is missing
+    currency_mismatch_severity: "minor"    # When currency doesn't match
+    multiple_prices_severity: "minor"      # When multiple prices mentioned
+    outdated_price_severity: "major"       # When price is outdated
+  
+  # Business rules
+  business_rules:
+    high_value_threshold: 10000000         # VND threshold for high-value items
+    high_value_tolerance_percent: 0.5      # Stricter tolerance for high-value items
+    bulk_pricing_allowed: true             # Allow bulk pricing variations
+    seasonal_pricing_allowed: true         # Allow seasonal price variations
+
+# ===== POLICY AUTHENTICITY THRESHOLDS =====
+policy_authenticity:
+  # Severity classification rules
+  severity_rules:
+    fabricated_policy: "critical"          # Fabricated policies are critical
+    inaccurate_policy: "major"            # Inaccurate policies are major
+    incomplete_policy: "minor"            # Incomplete policies are minor
+    missing_citation: "major"             # Missing citations are major
+    outdated_policy: "major"              # Outdated policies are major
+  
+  # Citation requirements
+  citation_requirements:
+    citation_required: true               # Require policy citations
+    source_verification_required: true    # Verify against source documents
+    specific_section_required: false      # Require specific policy sections
+    date_verification_required: true      # Verify policy dates
+  
+  # Forbidden phrases indicating fabrication (by language)
+  forbidden_phrases:
+    vietnamese:
+      - "tự bịa"
+      - "không có trong hệ thống"
+      - "theo ý kiến cá nhân"
+      - "chúng tôi nghĩ rằng"
+      - "có thể là"
+      - "dường như"
+      - "theo hiểu biết của tôi"
+    english:
+      - "fabricated"
+      - "made up"
+      - "personal opinion"
+      - "we think that"
+      - "probably"
+      - "might be"
+      - "seems like"
+      - "I believe"
+      - "in my opinion"
+  
+  # Policy type specific severity mapping
+  policy_type_severity:
+    warranty: "critical"      # Warranty policy errors are critical
+    return: "major"          # Return policy errors are major
+    exchange: "major"        # Exchange policy errors are major
+    service: "minor"         # Service policy errors are minor
+    support: "minor"         # Support policy errors are minor
+    shipping: "minor"        # Shipping policy errors are minor
+    privacy: "major"         # Privacy policy errors are major
+    terms: "major"           # Terms of service errors are major
+  
+  # Validation rules
+  validation_rules:
+    require_policy_version: true          # Require policy version info
+    check_policy_expiry: true            # Check if policy is expired
+    validate_policy_scope: true          # Validate policy applies to situation
+    cross_reference_policies: true       # Cross-reference related policies
+
+# ===== TOPIC RELEVANCE THRESHOLDS =====
+topic_relevance:
+  # Coverage ratio thresholds (lower coverage = higher severity)
+  coverage_thresholds:
+    minor_coverage_threshold: 0.8        # 80%+ coverage = minor issues only
+    major_coverage_threshold: 0.5        # 50-80% coverage = major issues
+    critical_coverage_threshold: 0.3     # <30% coverage = critical issues
+    completely_irrelevant_threshold: 0.1 # <10% coverage = completely irrelevant
+  
+  # Pass criteria
+  pass_criteria:
+    min_coverage_ratio: 0.7              # 70% minimum coverage for PASS
+    require_main_intent_addressed: true   # Must address main objection intent
+    require_actionable_solution: true     # Must provide actionable solution
+    allow_partial_answers: false         # Don't allow partial answers
+  
+  # Empathy requirements
+  empathy_requirements:
+    empathy_required: true               # Require empathy statements
+    min_empathy_score: 0.5              # Minimum empathy score (0-1)
+    missing_empathy_severity: "minor"    # Severity when empathy missing
+    empathy_bonus_enabled: true         # Give bonus for good empathy
+  
+  # Intent detection and coverage
+  intent_coverage:
+    required_intent_coverage: 0.8        # 80% of detected intents must be addressed
+    off_topic_penalty_threshold: 0.2     # Penalty when >20% content is off-topic
+    max_off_topic_ratio: 0.3            # Maximum allowed off-topic content
+  
+  # Response quality factors
+  quality_factors:
+    direct_answer_weight: 0.4            # Weight for direct answer to objection
+    context_understanding_weight: 0.3     # Weight for understanding context
+    solution_provided_weight: 0.2        # Weight for providing solution
+    empathy_bonus_weight: 0.1            # Weight for empathy bonus
+  
+  # Special handling
+  special_cases:
+    complex_objection_tolerance: 0.6     # Lower threshold for complex objections
+    technical_question_tolerance: 0.65   # Lower threshold for technical questions
+    comparison_request_tolerance: 0.75   # Higher threshold for comparison requests
+    price_inquiry_tolerance: 0.8        # Higher threshold for price inquiries
+
+# ===== ESCALATION THRESHOLDS =====
+escalation:
+  # Issue count thresholds
+  count_thresholds:
+    max_critical_before_escalation: 2    # Max critical issues before escalation
+    max_major_before_escalation: 5       # Max major issues before escalation  
+    max_total_before_escalation: 10      # Max total issues before escalation
+    max_fabricated_policies: 1          # Max fabricated policies (always escalate)
+  
+  # Immediate escalation triggers
+  immediate_triggers:
+    fabricated_policy_detected: true     # Escalate on fabricated policy
+    critical_price_deviation: true      # Escalate on critical price deviation
+    completely_irrelevant_response: true # Escalate on irrelevant response
+    multiple_critical_issues: true      # Escalate on multiple critical issues
+    security_policy_violation: true     # Escalate on security policy issues
+  
+  # Early termination rules
+  early_termination:
+    enabled: true                        # Enable early termination
+    stop_on_first_critical: false       # Don't stop on first critical (gather all)
+    stop_on_multiple_critical: true     # Stop when multiple critical found
+    multiple_critical_threshold: 3      # Number of critical issues to stop
+    stop_on_fabricated_policy: true     # Stop immediately on fabricated policy
+  
+  # Retry limits based on issue severity
+  retry_limits:
+    max_retries_with_critical: 1         # Limited retries with critical issues
+    max_retries_with_major: 3           # More retries with major issues
+    max_retries_with_minor: 5           # Most retries with minor issues only
+    no_retry_on_fabrication: true       # No retries for fabricated policies
+  
+  # Escalation priority mapping
+  priority_mapping:
+    critical_issues_3_plus: "immediate"  # 3+ critical = immediate
+    critical_issues_1_2: "high"         # 1-2 critical = high
+    major_issues_5_plus: "medium"       # 5+ major = medium
+    major_issues_3_4: "low"             # 3-4 major = low
+    minor_only: "low"                   # Minor only = low
+
+# ===== PERFORMANCE AND OPTIMIZATION =====
+performance:
+  # Parallel processing thresholds
+  parallel_processing:
+    enable_parallel_checks: true        # Run checks in parallel
+    max_concurrent_checks: 3            # Max concurrent verification checks
+    timeout_per_check_seconds: 10       # Timeout per individual check
+    total_verification_timeout: 30      # Total verification timeout
+  
+  # Caching thresholds
+  caching:
+    cache_verification_results: true    # Cache verification results
+    cache_policy_lookups: true         # Cache policy document lookups
+    cache_price_data: true             # Cache price data lookups
+    cache_ttl_seconds: 3600            # Cache TTL (1 hour)
+    max_cache_entries: 1000            # Maximum cache entries
+  
+  # Resource limits
+  resource_limits:
+    max_memory_mb: 512                 # Maximum memory usage
+    max_processing_time_seconds: 60    # Maximum processing time
+    max_llm_tokens_per_check: 2000     # Maximum LLM tokens per check
+    max_total_llm_tokens: 5000         # Maximum total LLM tokens
+
+# ===== MONITORING AND ALERTING =====
+monitoring:
+  # Threshold-based alerting
+  alerting_thresholds:
+    critical_issue_rate_threshold: 0.1  # Alert if >10% have critical issues
+    escalation_rate_threshold: 0.05     # Alert if >5% escalated
+    fabrication_detection_threshold: 0.02 # Alert if >2% fabricated policies
+    verification_failure_rate: 0.3      # Alert if >30% verification failures
+  
+  # Performance monitoring thresholds
+  performance_thresholds:
+    max_avg_verification_time: 15       # Alert if avg time >15s
+    max_timeout_rate: 0.05             # Alert if >5% timeouts
+    min_cache_hit_rate: 0.7            # Alert if cache hit rate <70%
+    max_retry_rate: 0.2                # Alert if >20% require retries
+  
+  # Quality metrics thresholds
+  quality_thresholds:
+    min_accuracy_rate: 0.95            # Alert if accuracy <95%
+    max_false_positive_rate: 0.05      # Alert if false positives >5%
+    max_false_negative_rate: 0.02      # Alert if false negatives >2%
+
+# ===== ENVIRONMENT-SPECIFIC OVERRIDES =====
+environments:
+  # Development environment - more lenient thresholds
+  development:
+    price_accuracy:
+      pass_criteria:
+        tolerance_percent: 2.0          # More lenient price tolerance
+      thresholds:
+        critical_threshold_percent: 50.0 # Higher critical threshold
+    
+    escalation:
+      count_thresholds:
+        max_critical_before_escalation: 5 # Allow more critical issues
+      early_termination:
+        enabled: false                  # Disable early termination for testing
+    
+    performance:
+      resource_limits:
+        max_processing_time_seconds: 120 # Longer timeout for debugging
+  
+  # Production environment - stricter thresholds
+  production:
+    price_accuracy:
+      pass_criteria:
+        tolerance_percent: 0.5          # Stricter price tolerance
+      business_rules:
+        high_value_tolerance_percent: 0.25 # Very strict for high-value items
+    
+    escalation:
+      count_thresholds:
+        max_critical_before_escalation: 1 # Immediate escalation
+      immediate_triggers:
+        fabricated_policy_detected: true # Always escalate fabrication
+    
+    performance:
+      resource_limits:
+        max_processing_time_seconds: 30  # Faster timeout in production
+  
+  # Testing environment - minimal thresholds for testing
+  testing:
+    escalation:
+      early_termination:
+        enabled: false                  # Disable for comprehensive testing
+      retry_limits:
+        max_retries_with_critical: 0    # No retries in testing
+    
+    monitoring:
+      alerting_thresholds:
+        critical_issue_rate_threshold: 1.0 # Disable alerting in tests
+
+# ===== BUSINESS RULES AND COMPLIANCE =====
+business_rules:
+  # Regulatory compliance thresholds
+  compliance:
+    financial_accuracy_required: true   # Require financial accuracy
+    consumer_protection_enabled: true   # Enable consumer protection rules
+    data_privacy_enforcement: true     # Enforce data privacy rules
+    advertising_standards_check: true   # Check advertising standards
+  
+  # Industry-specific rules
+  industry_rules:
+    electronics_warranty_strict: true   # Strict warranty rules for electronics
+    financial_products_critical: true   # Critical handling for financial products
+    healthcare_compliance_required: false # Healthcare compliance (if applicable)
+    automotive_safety_standards: false  # Automotive safety standards (if applicable)
+  
+  # Customer segment rules
+  customer_segments:
+    vip_customer_tolerance: 0.5         # Stricter tolerance for VIP customers
+    new_customer_empathy_required: true # Require empathy for new customers
+    enterprise_client_escalation: true  # Faster escalation for enterprise clients
+    retail_customer_standard: true     # Standard rules for retail customers
+
+# ===== ASYNC TIMEOUT THRESHOLDS =====
+timeouts:
+  # Per-operation timeout thresholds (seconds)
+  llm_call: 10.0           # Timeout for a single LLM API call
+  price_check: 5.0         # Timeout for price accuracy check
+  policy_check: 5.0        # Timeout for policy authenticity check
+  relevance_check: 5.0     # Timeout for topic relevance check
+  total_workflow: 30.0     # Timeout for the entire verification workflow
+
+  # Escalation behaviour on timeout
+  escalate_on_critical_timeout: true   # Escalate when a critical-path op times out
+
+# ===== CONFIGURATION METADATA =====
+metadata:
+  version: "1.0.0"
+  last_updated: "2024-01-15"
+  created_by: "verification_agent_team"
+  description: "Comprehensive thresholds configuration for binary verification system"
+  
+  # Configuration validation
+  validation:
+    schema_version: "1.0"
+    required_sections:
+      - price_accuracy
+      - policy_authenticity  
+      - topic_relevance
+      - escalation
+    
+    # Consistency checks
+    consistency_checks:
+      price_thresholds_ascending: true   # Ensure thresholds are in ascending order
+      coverage_thresholds_descending: true # Ensure coverage thresholds descend
+      retry_limits_logical: true         # Ensure retry limits make sense
+      escalation_rules_consistent: true  # Ensure escalation rules are consistent

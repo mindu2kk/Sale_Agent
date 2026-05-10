@@ -1,0 +1,351 @@
+# Workflow Configuration - LangGraph StateGraph Settings
+# Configuration for StateGraph workflow orchestration and node execution
+
+# ===== STATEGRAPH WORKFLOW SETTINGS =====
+
+workflow:
+  # Workflow identification
+  name: "verification_agent_workflow"
+  version: "1.0.0"
+  description: "Binary verification workflow with self-correction loop"
+  
+  # Workflow execution settings
+  execution:
+    max_execution_time_seconds: 300  # 5 minutes total workflow timeout
+    enable_persistence: true
+    enable_checkpoints: true
+    checkpoint_interval_seconds: 30
+    
+  # State management
+  state_management:
+    enable_state_compression: true
+    max_state_history: 10
+    cleanup_completed_workflows: true
+    state_ttl_hours: 24
+
+# ===== NODE CONFIGURATION =====
+
+nodes:
+  # Research Agent Node
+  research_node:
+    name: "research"
+    timeout_seconds: 60
+    retry_attempts: 2
+    
+    # Node-specific settings
+    settings:
+      enable_tool_usage_tracking: true
+      max_tools_per_execution: 5
+      enable_reasoning_logs: true
+    
+    # Error handling
+    error_handling:
+      continue_on_timeout: false
+      escalate_on_repeated_failure: true
+      max_consecutive_failures: 2
+
+  # Verification Agent Node  
+  verification_node:
+    name: "verification"
+    timeout_seconds: 30
+    retry_attempts: 1  # Verification should be deterministic
+    
+    # Node-specific settings
+    settings:
+      parallel_checks: true
+      early_termination_enabled: true
+      detailed_feedback_enabled: true
+    
+    # Error handling
+    error_handling:
+      continue_on_timeout: true  # Use fallback verification
+      fallback_to_human_review: true
+      log_verification_failures: true
+
+  # Self-Correction Node
+  correction_node:
+    name: "correction"
+    timeout_seconds: 45
+    retry_attempts: 1
+    
+    # Node-specific settings
+    settings:
+      generate_detailed_feedback: true
+      include_examples: true
+      prioritize_critical_issues: true
+    
+    # Error handling
+    error_handling:
+      continue_on_timeout: false
+      escalate_on_failure: true
+
+  # Human Escalation Node
+  escalation_node:
+    name: "escalation"
+    timeout_seconds: 10  # Just for logging and notification
+    retry_attempts: 0
+    
+    # Node-specific settings
+    settings:
+      send_notifications: true
+      include_full_context: true
+      priority_level: "high"
+
+# ===== CONDITIONAL EDGES CONFIGURATION =====
+
+edges:
+  # After Research Node
+  research_to_verification:
+    condition: "always"
+    target: "verification"
+    
+  # After Verification Node - Main routing logic
+  verification_routing:
+    conditions:
+      # Approved path
+      approved:
+        condition: "verification_result.is_approved == true"
+        target: "END"
+        
+      # Critical issues - immediate escalation
+      critical_escalation:
+        condition: "verification_result.critical_issues_count >= 3"
+        target: "escalation"
+        priority: 1  # Highest priority
+        
+      # Max retries exceeded
+      max_retries_escalation:
+        condition: "state.retry_count >= state.max_retries"
+        target: "escalation"
+        priority: 2
+        
+      # Normal correction path
+      correction:
+        condition: "verification_result.is_approved == false"
+        target: "correction"
+        priority: 3  # Default path
+  
+  # After Correction Node
+  correction_routing:
+    conditions:
+      # Back to research for retry
+      retry_research:
+        condition: "state.retry_count < state.max_retries"
+        target: "research"
+        
+      # Escalate if max retries reached
+      escalate:
+        condition: "state.retry_count >= state.max_retries"
+        target: "escalation"
+  
+  # After Escalation Node
+  escalation_to_end:
+    condition: "always"
+    target: "END"
+
+# ===== WORKFLOW STATE SCHEMA =====
+
+state_schema:
+  # Required fields
+  required_fields:
+    - objection_text
+    - workflow_status
+    - retry_count
+    - max_retries
+    - execution_log
+  
+  # Optional fields with defaults
+  optional_fields:
+    draft_response: ""
+    tools_used: []
+    research_reasoning: ""
+    verification_result: null
+    correction_feedback: null
+    final_response: ""
+  
+  # Field validation
+  validation:
+    objection_text:
+      max_length: 5000
+      min_length: 10
+    retry_count:
+      min_value: 0
+      max_value: 10
+    max_retries:
+      min_value: 1
+      max_value: 10
+
+# ===== EXECUTION FLOW CONTROL =====
+
+flow_control:
+  # Retry logic
+  retry_settings:
+    max_workflow_retries: 1  # Retry entire workflow once on failure
+    retry_delay_seconds: 5
+    exponential_backoff: false
+    
+  # Timeout handling
+  timeout_handling:
+    node_timeout_action: "escalate"  # escalate, skip, retry
+    workflow_timeout_action: "escalate"
+    
+  # Concurrency control
+  concurrency:
+    max_concurrent_workflows: 10
+    queue_max_size: 100
+    queue_timeout_seconds: 300
+
+# ===== OBSERVABILITY AND MONITORING =====
+
+observability:
+  # Execution tracking
+  execution_tracking:
+    enabled: true
+    track_node_performance: true
+    track_state_transitions: true
+    track_edge_conditions: true
+    
+  # Metrics collection
+  metrics:
+    enabled: true
+    collection_interval_seconds: 30
+    
+    # Workflow metrics
+    workflow_metrics:
+      - total_execution_time
+      - nodes_executed_count
+      - retry_count
+      - success_rate
+      - escalation_rate
+    
+    # Node metrics
+    node_metrics:
+      - node_execution_time
+      - node_success_rate
+      - node_error_rate
+      - node_timeout_rate
+  
+  # Logging configuration
+  logging:
+    log_state_transitions: true
+    log_edge_evaluations: true
+    log_node_inputs_outputs: true
+    log_performance_metrics: true
+    
+    # Log levels per component
+    log_levels:
+      workflow_engine: INFO
+      node_execution: INFO
+      state_management: DEBUG
+      error_handling: WARNING
+
+# ===== ERROR HANDLING AND RECOVERY =====
+
+error_handling:
+  # Global error handling
+  global_settings:
+    continue_on_node_failure: false
+    max_consecutive_node_failures: 3
+    escalate_on_workflow_failure: true
+    
+  # Recovery strategies
+  recovery_strategies:
+    node_timeout:
+      strategy: "retry_with_extended_timeout"
+      max_attempts: 2
+      timeout_multiplier: 1.5
+      
+    node_error:
+      strategy: "log_and_escalate"
+      include_stack_trace: true
+      notify_administrators: true
+      
+    state_corruption:
+      strategy: "rollback_to_checkpoint"
+      max_rollback_attempts: 3
+      
+    resource_exhaustion:
+      strategy: "queue_for_later_execution"
+      queue_priority: "normal"
+
+# ===== PERFORMANCE OPTIMIZATION =====
+
+performance:
+  # Execution optimization
+  optimization:
+    enable_node_caching: true
+    cache_node_results: true
+    cache_ttl_seconds: 1800  # 30 minutes
+    
+    # Parallel execution
+    parallel_execution:
+      enabled: true
+      max_parallel_nodes: 2  # verification checks can run in parallel
+      
+    # Resource management
+    resource_limits:
+      max_memory_mb: 512
+      max_cpu_percent: 50
+      
+  # Scaling settings
+  scaling:
+    auto_scaling_enabled: true
+    min_workers: 1
+    max_workers: 5
+    scale_up_threshold: 0.8  # CPU/memory threshold
+    scale_down_threshold: 0.3
+
+# ===== ENVIRONMENT-SPECIFIC OVERRIDES =====
+
+environments:
+  # Development environment
+  development:
+    workflow:
+      execution:
+        max_execution_time_seconds: 600  # Longer timeout for debugging
+    nodes:
+      research_node:
+        timeout_seconds: 120
+      verification_node:
+        timeout_seconds: 60
+    observability:
+      logging:
+        log_levels:
+          workflow_engine: DEBUG
+          node_execution: DEBUG
+          state_management: DEBUG
+    
+  # Production environment
+  production:
+    workflow:
+      execution:
+        max_execution_time_seconds: 180  # Stricter timeout
+    nodes:
+      research_node:
+        timeout_seconds: 45
+      verification_node:
+        timeout_seconds: 20
+    performance:
+      scaling:
+        min_workers: 2
+        max_workers: 10
+    observability:
+      logging:
+        log_levels:
+          workflow_engine: WARNING
+          node_execution: INFO
+          state_management: WARNING
+          
+  # Testing environment
+  testing:
+    workflow:
+      execution:
+        enable_persistence: false
+        enable_checkpoints: false
+    observability:
+      metrics:
+        enabled: false
+      logging:
+        log_levels:
+          workflow_engine: ERROR
+          node_execution: ERROR

@@ -1,0 +1,400 @@
+# Production Environment Configuration
+# Optimized settings for production deployment with strict thresholds
+
+# ===== PRODUCTION-SPECIFIC OVERRIDES =====
+
+# Inherit from base configuration and override for production
+base_config: "../verification_config.yaml"
+
+# ===== STRICT VERIFICATION THRESHOLDS =====
+
+price_accuracy:
+  tolerance_percent: 0.5  # Stricter tolerance (±0.5%)
+  critical_threshold_percent: 15.0  # Lower threshold for critical issues
+  
+  # Production-strict settings
+  fuzzy_matching_enabled: false  # Exact matching only
+  allow_test_data: false
+  require_currency_validation: true
+  
+  # Strict severity thresholds
+  severity_thresholds:
+    minor: 2.0    # 0-2% deviation = minor
+    major: 8.0    # 2-8% deviation = major  
+    critical: 15.0 # >15% deviation = critical
+  
+  # Production validation rules
+  validation_rules:
+    require_product_code_match: true
+    validate_promotional_pricing: true
+    check_price_history: true
+
+policy_authenticity:
+  # Strict policy requirements
+  citation_required: true
+  require_strict_citations: true
+  allow_test_policies: false
+  
+  # Enhanced forbidden phrases detection
+  forbidden_phrases:
+    vietnamese:
+      - "tự bịa"
+      - "không có trong hệ thống"
+      - "theo ý kiến cá nhân"
+      - "chúng tôi nghĩ rằng"
+      - "có thể"
+      - "dường như"
+    english:
+      - "fabricated"
+      - "made up"
+      - "personal opinion"
+      - "we think that"
+      - "probably"
+      - "might be"
+      - "seems like"
+      - "I believe"
+  
+  # Production validation rules
+  validation_rules:
+    require_specific_citations: true
+    check_policy_dates: true
+    verify_policy_scope: true
+    validate_terms_accuracy: true
+    cross_reference_multiple_sources: true
+
+topic_relevance:
+  min_coverage_ratio: 0.8  # Higher threshold for production (80%)
+  
+  # Strict empathy requirements
+  empathy_detection:
+    enabled: true
+    bonus_points: 0.05  # Lower bonus in production
+    require_empathy_for_complaints: true
+    
+  # Production relevance rules
+  relevance_rules:
+    require_direct_answer: true
+    penalize_generic_responses: true
+    require_actionable_solutions: true
+
+# ===== PRODUCTION WORKFLOW SETTINGS =====
+
+workflow:
+  execution:
+    max_execution_time_seconds: 180  # 3 minutes strict timeout
+    enable_persistence: true
+    enable_checkpoints: true
+    checkpoint_interval_seconds: 60
+    
+  # Production reliability features
+  reliability:
+    enable_circuit_breaker: true
+    circuit_breaker_threshold: 5  # failures before opening
+    circuit_breaker_timeout: 300  # 5 minutes
+    enable_health_checks: true
+    health_check_interval: 30
+
+# ===== PRODUCTION NODE CONFIGURATION =====
+
+nodes:
+  research_node:
+    timeout_seconds: 45  # Strict timeout
+    retry_attempts: 2
+    
+    settings:
+      enable_debug_mode: false
+      save_tool_outputs: false
+      detailed_reasoning_logs: false
+      
+    # Production error handling
+    error_handling:
+      fail_fast_on_critical_errors: true
+      escalate_on_timeout: true
+      
+  verification_node:
+    timeout_seconds: 20  # Very strict timeout
+    retry_attempts: 1
+    
+    settings:
+      parallel_checks: true  # Optimize for speed
+      early_termination_enabled: true
+      save_verification_details: false
+      
+    # Production optimization
+    optimization:
+      cache_verification_prompts: true
+      use_optimized_models: true
+      
+  correction_node:
+    timeout_seconds: 30
+    retry_attempts: 1
+    
+    settings:
+      generate_detailed_feedback: false  # Concise feedback only
+      include_debug_suggestions: false
+      prioritize_critical_issues: true
+
+# ===== PRODUCTION PERFORMANCE SETTINGS =====
+
+performance:
+  # Strict performance requirements
+  verification_timeout_seconds: 15
+  individual_check_timeout_seconds: 5
+  
+  # Production caching strategy
+  caching:
+    enabled: true
+    ttl_seconds: 7200  # 2 hours
+    max_entries: 2000
+    cache_debug_data: false
+    use_distributed_cache: true
+    
+  # Production optimizations
+  optimization:
+    enable_profiling: false
+    track_memory_usage: true
+    save_performance_reports: false
+    use_connection_pooling: true
+    
+  # Resource limits
+  resource_limits:
+    max_memory_mb: 256
+    max_cpu_percent: 30
+    max_concurrent_verifications: 20
+
+# ===== PRODUCTION RETRY SETTINGS =====
+
+retry_settings:
+  max_retries: 2  # Fewer retries in production
+  retry_backoff_seconds: 2.0
+  exponential_backoff: true
+  max_backoff_seconds: 8.0
+  
+  # Production retry conditions
+  retry_on_timeout: false  # Fail fast on timeout
+  retry_on_api_error: true
+  retry_on_db_error: true
+  retry_on_validation_error: false
+
+# ===== PRODUCTION LOGGING =====
+
+logging:
+  level: WARNING  # Minimal logging for performance
+  detailed_verification_logs: false
+  log_verification_reasoning: false
+  log_performance_metrics: true
+  
+  # Production logging optimization
+  production_logging:
+    log_all_llm_calls: false
+    log_state_transitions: false
+    log_prompt_templates: false
+    log_api_responses: false
+    save_logs_to_file: true
+    use_structured_logging: true
+    
+  # Essential fields only
+  include_fields:
+    - timestamp
+    - verification_id
+    - verification_result
+    - execution_time
+    - issues_found
+    - error_code
+
+# ===== PRODUCTION MONITORING =====
+
+monitoring:
+  metrics_enabled: true
+  export_interval_seconds: 120  # Less frequent exports
+  
+  # Production metrics focus
+  tracked_metrics:
+    - verification_success_rate
+    - average_verification_time
+    - critical_issues_per_hour
+    - escalation_rate
+    - api_error_rate
+    - system_availability
+    - throughput_per_minute
+    
+  # Production alerts
+  alerts:
+    enabled: true
+    alert_channels:
+      - email
+      - slack
+      - pagerduty
+    
+    # Critical production alerts
+    critical_alerts:
+      - high_error_rate: 0.05  # 5% error rate
+      - slow_response_time: 20  # >20 seconds
+      - high_escalation_rate: 0.1  # 10% escalation rate
+      - system_unavailable: true
+
+# ===== PRODUCTION SECURITY SETTINGS =====
+
+security:
+  # Strict security for production
+  input_validation:
+    strict_validation: true
+    allow_test_inputs: false
+    max_objection_length: 3000  # Smaller limit
+    sanitize_inputs: true
+    
+  # Production authentication
+  authentication:
+    require_api_key: true
+    api_key_rotation_days: 30
+    allow_localhost: false
+    enable_debug_endpoints: false
+    
+  # Rate limiting
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 100
+    burst_limit: 20
+    
+  # Data protection
+  data_protection:
+    encrypt_sensitive_data: true
+    mask_customer_data_in_logs: true
+    data_retention_days: 90
+
+# ===== PRODUCTION API SETTINGS =====
+
+api_settings:
+  # Production LLM API configuration
+  llm:
+    model_name: "gpt-4"
+    temperature: 0.1  # Low but not zero for slight variation
+    max_tokens: 1500  # Smaller for efficiency
+    timeout_seconds: 30
+    
+  # Production rate limiting
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 200
+    burst_allowance: 50
+    
+  # API reliability
+  reliability:
+    retry_attempts: 3
+    retry_backoff: 2.0
+    circuit_breaker_enabled: true
+    health_check_enabled: true
+
+# ===== PRODUCTION DATABASE SETTINGS =====
+
+database:
+  # Production database configuration
+  connection:
+    use_connection_pooling: true
+    pool_size: 10
+    max_overflow: 20
+    pool_timeout: 30
+    
+  # Production query optimization
+  queries:
+    timeout_seconds: 10  # Strict timeout
+    enable_query_logging: false
+    use_prepared_statements: true
+    enable_query_cache: true
+    
+  # Production data management
+  data_management:
+    auto_create_test_data: false
+    enable_data_archiving: true
+    backup_frequency_hours: 6
+    
+  # High availability
+  high_availability:
+    enable_read_replicas: true
+    enable_failover: true
+    health_check_interval: 60
+
+# ===== PRODUCTION SCALING SETTINGS =====
+
+scaling:
+  # Auto-scaling configuration
+  auto_scaling:
+    enabled: true
+    min_instances: 2
+    max_instances: 10
+    scale_up_threshold: 0.7  # CPU/memory threshold
+    scale_down_threshold: 0.3
+    scale_up_cooldown: 300  # 5 minutes
+    scale_down_cooldown: 600  # 10 minutes
+    
+  # Load balancing
+  load_balancing:
+    enabled: true
+    algorithm: "round_robin"
+    health_check_enabled: true
+    sticky_sessions: false
+    
+  # Resource allocation
+  resource_allocation:
+    cpu_request: "200m"
+    cpu_limit: "500m"
+    memory_request: "256Mi"
+    memory_limit: "512Mi"
+
+# ===== PRODUCTION NOTIFICATION SETTINGS =====
+
+notifications:
+  # Production notification configuration
+  enabled: true
+  channels:
+    - email
+    - slack
+    - webhook
+    
+  # Notification priorities
+  levels:
+    escalation: "critical"
+    critical_issue: "high"
+    performance_alert: "medium"
+    system_health: "low"
+    
+  # Production notification rules
+  notification_rules:
+    escalation:
+      immediate: true
+      channels: ["email", "slack", "pagerduty"]
+    critical_issue:
+      immediate: true
+      channels: ["email", "slack"]
+    performance_degradation:
+      immediate: false
+      channels: ["slack"]
+      
+  # Notification throttling
+  throttling:
+    enabled: true
+    max_notifications_per_hour: 10
+    duplicate_suppression_minutes: 30
+
+# ===== PRODUCTION BACKUP AND RECOVERY =====
+
+backup_recovery:
+  # Backup configuration
+  backup:
+    enabled: true
+    frequency_hours: 6
+    retention_days: 30
+    include_configurations: true
+    include_logs: false
+    
+  # Recovery procedures
+  recovery:
+    enable_automatic_recovery: true
+    recovery_timeout_minutes: 15
+    rollback_on_failure: true
+    
+  # Disaster recovery
+  disaster_recovery:
+    enable_cross_region_backup: true
+    recovery_time_objective_hours: 4
+    recovery_point_objective_hours: 1

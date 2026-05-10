@@ -1,0 +1,699 @@
+# Verification Prompt Templates
+# Structured prompts for binary verification system with consistent formatting
+
+# ===== BINARY CHECKER TEMPLATES (primary templates used by PromptTemplateManager) =====
+
+price_accuracy_check:
+  template: |
+    You are a Price Accuracy Checker. Your task is to verify whether prices mentioned in the
+    sales draft response are accurate compared to the internal product database.
+
+    **CUSTOMER OBJECTION:**
+    {objection_text}
+
+    **DRAFT RESPONSE TO VERIFY:**
+    {draft_response}
+
+    **INTERNAL DATABASE PRICES:**
+    {db_data}
+
+    **VERIFICATION RULES:**
+    - PASS: All prices deviate ≤ {price_tolerance}% from database values
+    - FAIL: Any price deviates > {price_tolerance}% OR a required price is missing
+    - Critical threshold: >{critical_threshold}% deviation = CRITICAL severity
+    - Tolerance for rounding: ±{price_tolerance}%
+
+    **TASK:**
+    1. Extract every price mention from the draft response.
+    2. Cross-reference each price with the database records.
+    3. Calculate deviation percentage for each price found.
+    4. Determine overall PASS or FAIL.
+
+    **OUTPUT — respond with valid JSON only:**
+    ```json
+    {{
+      "price_accuracy_pass": true,
+      "price_issues": [
+        {{
+          "product_name": "product name",
+          "product_sku": "SKU or null",
+          "mentioned_price": "price from draft",
+          "actual_price": "correct price from DB",
+          "deviation_percent": 0.0,
+          "currency": "VND",
+          "severity": "minor|major|critical",
+          "explanation": "detailed explanation of the issue",
+          "correction_suggestion": "specific fix suggestion or null"
+        }}
+      ],
+      "overall_reasoning": "concise explanation of the PASS/FAIL decision"
+    }}
+    ```
+    If no price issues exist, return an empty array for price_issues.
+  variables:
+    - objection_text
+    - draft_response
+    - db_data
+    - price_tolerance
+    - critical_threshold
+
+policy_authenticity_check:
+  template: |
+    You are a Policy Authenticity Checker. Your task is to verify that all policy statements
+    in the sales draft response are accurate and sourced from official policy documents.
+
+    **DRAFT RESPONSE TO VERIFY:**
+    {draft_response}
+
+    **OFFICIAL POLICY DOCUMENTS:**
+    {policy_documents}
+
+    **VERIFICATION RULES:**
+    - PASS: All policy statements are verified against official documents with proper citations
+    - FAIL: Any policy is fabricated, inaccurate, or lacks required citation
+    - Fabricated policy (not found in any document) = CRITICAL severity
+    - Inaccurate policy (found but details wrong) = MAJOR severity
+    - Incomplete policy (correct but missing details) = MINOR severity
+
+    **FORBIDDEN INDICATORS (suggest fabrication):**
+    {forbidden_phrases}
+
+    **TASK:**
+    1. Identify all policy statements in the draft (warranty, return, exchange, service, support).
+    2. Verify each statement against the official policy documents.
+    3. Flag any fabricated, inaccurate, or uncited policies.
+    4. Determine overall PASS or FAIL.
+
+    **OUTPUT — respond with valid JSON only:**
+    ```json
+    {{
+      "policy_authenticity_pass": true,
+      "policy_issues": [
+        {{
+          "mentioned_policy": "exact policy text from draft",
+          "policy_type": "warranty|return|exchange|service|support",
+          "is_fabricated": false,
+          "is_inaccurate": false,
+          "is_incomplete": false,
+          "correct_policy": "correct policy text or null",
+          "severity": "minor|major|critical",
+          "explanation": "detailed explanation of the issue",
+          "source_document": "document name or null",
+          "policy_section": "section reference or null",
+          "correction_suggestion": "specific fix suggestion or null"
+        }}
+      ],
+      "overall_reasoning": "concise explanation of the PASS/FAIL decision"
+    }}
+    ```
+    If no policy issues exist, return an empty array for policy_issues.
+  variables:
+    - draft_response
+    - policy_documents
+    - forbidden_phrases
+
+topic_relevance_check:
+  template: |
+    You are a Topic Relevance Assessor. Your task is to evaluate whether the sales draft
+    response adequately addresses the customer's objection.
+
+    **CUSTOMER OBJECTION:**
+    {objection_text}
+
+    **DRAFT RESPONSE TO VERIFY:**
+    {draft_response}
+
+    **VERIFICATION RULES:**
+    - PASS: Coverage ratio ≥ {relevance_threshold} AND main concern is addressed
+    - FAIL: Coverage ratio < {relevance_threshold} OR main concern is missed
+    - Coverage < 0.3 = CRITICAL severity (severely off-topic)
+    - Coverage 0.3–{relevance_threshold} = MAJOR severity
+    - Coverage ≥ {relevance_threshold} but missing minor aspects = MINOR severity
+
+    **EMPATHY INDICATORS TO DETECT:**
+    {empathy_phrases}
+
+    **TASK:**
+    1. Identify the primary intent and key concerns in the objection.
+    2. Assess how well the draft addresses each concern (coverage ratio 0.0–1.0).
+    3. Detect any off-topic content.
+    4. Evaluate empathy level in the response.
+    5. Determine overall PASS or FAIL.
+
+    **OUTPUT — respond with valid JSON only:**
+    ```json
+    {{
+      "topic_relevance_pass": true,
+      "relevance_issues": [
+        {{
+          "objection_intent": "primary intent detected",
+          "detected_intents": ["list", "of", "detected", "intents"],
+          "response_coverage": 0.85,
+          "missing_aspects": ["aspect not addressed"],
+          "off_topic_content": ["irrelevant content found"],
+          "empathy_score": 0.7,
+          "severity": "minor|major|critical",
+          "explanation": "detailed explanation of the issue",
+          "correction_suggestion": "specific improvement suggestion or null"
+        }}
+      ],
+      "overall_reasoning": "concise explanation of the PASS/FAIL decision"
+    }}
+    ```
+    If no relevance issues exist, return an empty array for relevance_issues.
+  variables:
+    - objection_text
+    - draft_response
+    - relevance_threshold
+    - empathy_phrases
+
+correction_feedback:
+  template: |
+    You are a Self-Correction Advisor. Based on the failed verification results, generate
+    structured correction instructions for the Sales Research Agent to improve the draft.
+
+    **ORIGINAL CUSTOMER OBJECTION:**
+    {objection_text}
+
+    **FAILED DRAFT RESPONSE:**
+    {failed_draft}
+
+    **VERIFICATION FAILURE DETAILS:**
+    {verification_issues}
+
+    **CORRECTION REQUIREMENTS:**
+
+    For Price Issues:
+    - Provide the exact correct prices from the database
+    - Explain any pricing rules or promotions that apply
+    - Reference the specific product SKU for clarity
+
+    For Policy Issues:
+    - Provide the exact policy text from official documents
+    - Include proper citations and document references
+    - Clarify any conditions or limitations
+
+    For Relevance Issues:
+    - List the specific aspects of the objection that were missed
+    - Suggest empathy statements if the response lacked them
+    - Recommend a clearer structure to address all concerns
+
+    **OUTPUT — respond with valid JSON only:**
+    ```json
+    {{
+      "correction_priority": "high|medium|low",
+      "critical_fixes_required": [
+        {{
+          "issue_type": "price|policy|relevance",
+          "current_problem": "what is wrong in the current draft",
+          "required_fix": "specific correction needed",
+          "example_text": "suggested replacement text or null"
+        }}
+      ],
+      "improvement_suggestions": [
+        {{
+          "area": "aspect to improve",
+          "suggestion": "how to improve it",
+          "optional": false
+        }}
+      ],
+      "updated_prompt_instructions": "additional instructions for the research agent rewrite",
+      "correction_reasoning": "why these corrections are necessary"
+    }}
+    ```
+  variables:
+    - objection_text
+    - failed_draft
+    - verification_issues
+
+# ===== MAIN VERIFICATION PROMPTS =====
+
+verification_prompts:
+  # Master verification prompt template
+  master_verification:
+    template: |
+      You are a Verification Agent responsible for binary PASS/FAIL evaluation of sales draft responses.
+      
+      **VERIFICATION TASK:**
+      Evaluate the draft response against the customer objection using binary criteria:
+      1. Price Accuracy (PASS/FAIL)
+      2. Policy Authenticity (PASS/FAIL) 
+      3. Topic Relevance (PASS/FAIL)
+      
+      **CUSTOMER OBJECTION:**
+      {objection_text}
+      
+      **DRAFT RESPONSE TO VERIFY:**
+      {draft_response}
+      
+      **VERIFICATION CRITERIA:**
+      
+      **1. PRICE ACCURACY CHECK:**
+      - Extract all price mentions from draft
+      - Cross-reference with internal database
+      - PASS: Price deviation ≤ {price_tolerance}%
+      - FAIL: Price deviation > {price_tolerance}% OR no price when required
+      
+      **2. POLICY AUTHENTICITY CHECK:**
+      - Identify all policy statements (warranty, return, exchange)
+      - Verify against official policy documents
+      - PASS: All policies verified with proper citations
+      - FAIL: Any fabricated, inaccurate, or uncited policies
+      
+      **3. TOPIC RELEVANCE CHECK:**
+      - Analyze semantic alignment with objection intent
+      - Evaluate coverage of customer concerns
+      - PASS: Coverage ratio ≥ {relevance_threshold} AND addresses main concern
+      - FAIL: Coverage ratio < {relevance_threshold} OR misses main point
+      
+      **OUTPUT FORMAT:**
+      Provide structured JSON response:
+      ```json
+      {{
+        "price_accuracy_pass": boolean,
+        "policy_authenticity_pass": boolean,
+        "topic_relevance_pass": boolean,
+        "overall_pass": boolean,
+        "critical_issues_count": number,
+        "verification_reasoning": "detailed explanation",
+        "specific_issues": [
+          {{
+            "type": "price|policy|relevance",
+            "severity": "minor|major|critical", 
+            "description": "specific issue description",
+            "suggestion": "how to fix this issue"
+          }}
+        ]
+      }}
+      ```
+      
+      **CRITICAL RULES:**
+      - Be strict but fair in evaluation
+      - Provide specific, actionable feedback
+      - Flag critical issues that require immediate attention
+      - Consider business impact of each issue
+    
+    variables:
+      - objection_text
+      - draft_response
+      - price_tolerance
+      - relevance_threshold
+
+# ===== INDIVIDUAL CHECK PROMPTS =====
+
+price_accuracy_prompts:
+  # Price extraction and verification
+  price_extraction:
+    template: |
+      Extract all price mentions from the following sales response:
+      
+      **TEXT TO ANALYZE:**
+      {draft_response}
+      
+      **EXTRACTION REQUIREMENTS:**
+      - Find all monetary amounts (numbers + currency)
+      - Include product names/codes associated with prices
+      - Note any promotional pricing or discounts
+      - Identify currency types (VND, USD, etc.)
+      
+      **OUTPUT FORMAT:**
+      ```json
+      {{
+        "prices_found": [
+          {{
+            "amount": "price value",
+            "currency": "currency code",
+            "product": "product name/code",
+            "context": "surrounding text context"
+          }}
+        ],
+        "has_prices": boolean,
+        "price_count": number
+      }}
+      ```
+    
+    variables:
+      - draft_response
+  
+  # Price verification against database
+  price_verification:
+    template: |
+      Verify extracted prices against internal database records:
+      
+      **EXTRACTED PRICES:**
+      {extracted_prices}
+      
+      **DATABASE RECORDS:**
+      {database_prices}
+      
+      **VERIFICATION RULES:**
+      - Tolerance: ±{tolerance_percent}%
+      - Critical threshold: >{critical_threshold}%
+      - Consider promotional pricing
+      - Account for currency conversion
+      
+      **ANALYSIS:**
+      For each price, calculate:
+      1. Deviation percentage: |extracted - database| / database * 100
+      2. Severity level based on deviation
+      3. Pass/fail determination
+      
+      **OUTPUT FORMAT:**
+      ```json
+      {{
+        "price_accuracy_pass": boolean,
+        "total_prices_checked": number,
+        "failed_prices": number,
+        "price_issues": [
+          {{
+            "product": "product name",
+            "extracted_price": "price from draft",
+            "database_price": "correct price",
+            "deviation_percent": number,
+            "severity": "minor|major|critical",
+            "pass": boolean
+          }}
+        ],
+        "overall_reasoning": "explanation of pass/fail decision"
+      }}
+      ```
+    
+    variables:
+      - extracted_prices
+      - database_prices
+      - tolerance_percent
+      - critical_threshold
+
+policy_authenticity_prompts:
+  # Policy statement detection
+  policy_detection:
+    template: |
+      Identify all policy statements in the sales response:
+      
+      **TEXT TO ANALYZE:**
+      {draft_response}
+      
+      **POLICY TYPES TO DETECT:**
+      - Warranty terms and duration
+      - Return/exchange policies
+      - Service and support policies
+      - Refund conditions
+      - Repair/replacement terms
+      
+      **DETECTION KEYWORDS:**
+      Vietnamese: bảo hành, đổi trả, hoàn tiền, sửa chữa, thay thế
+      English: warranty, return, exchange, refund, repair, replacement
+      
+      **OUTPUT FORMAT:**
+      ```json
+      {{
+        "policies_found": [
+          {{
+            "type": "warranty|return|exchange|service",
+            "statement": "exact policy text from draft",
+            "context": "surrounding context",
+            "keywords_matched": ["list of matched keywords"]
+          }}
+        ],
+        "has_policies": boolean,
+        "policy_count": number
+      }}
+      ```
+    
+    variables:
+      - draft_response
+  
+  # Policy verification against official documents
+  policy_verification:
+    template: |
+      Verify policy statements against official policy documents:
+      
+      **DETECTED POLICIES:**
+      {detected_policies}
+      
+      **OFFICIAL POLICY DOCUMENTS:**
+      {policy_documents}
+      
+      **VERIFICATION REQUIREMENTS:**
+      - All policies must have official source
+      - Check for fabricated or inaccurate information
+      - Verify specific terms and conditions
+      - Ensure proper citations when required
+      
+      **FORBIDDEN INDICATORS:**
+      - Phrases suggesting fabrication: {forbidden_phrases}
+      - Vague or uncertain language
+      - Policies not found in official documents
+      
+      **OUTPUT FORMAT:**
+      ```json
+      {{
+        "policy_authenticity_pass": boolean,
+        "verified_policies": number,
+        "fabricated_policies": number,
+        "policy_issues": [
+          {{
+            "policy_statement": "policy text from draft",
+            "issue_type": "fabricated|inaccurate|uncited|missing_source",
+            "severity": "minor|major|critical",
+            "official_policy": "correct policy text or null",
+            "verification_source": "document reference or null"
+          }}
+        ],
+        "overall_reasoning": "explanation of authenticity assessment"
+      }}
+      ```
+    
+    variables:
+      - detected_policies
+      - policy_documents
+      - forbidden_phrases
+
+topic_relevance_prompts:
+  # Intent analysis and coverage assessment
+  relevance_analysis:
+    template: |
+      Analyze topic relevance between customer objection and sales response:
+      
+      **CUSTOMER OBJECTION:**
+      {objection_text}
+      
+      **SALES RESPONSE:**
+      {draft_response}
+      
+      **ANALYSIS FRAMEWORK:**
+      
+      **1. INTENT DETECTION:**
+      Identify primary intent from objection:
+      - Price concern (cost, expensive, budget)
+      - Feature question (specs, capabilities, performance)
+      - Policy inquiry (warranty, return, support)
+      - Comparison request (vs competitors, alternatives)
+      - Technical support (how-to, troubleshooting)
+      
+      **2. COVERAGE ASSESSMENT:**
+      Evaluate how well response addresses objection:
+      - Direct answer to main question
+      - Context understanding demonstration
+      - Actionable solution provided
+      - Empathy and acknowledgment shown
+      
+      **3. RELEVANCE SCORING:**
+      Calculate coverage ratio (0.0 to 1.0):
+      - 1.0: Completely addresses all aspects
+      - 0.7+: Addresses main concern adequately
+      - 0.5-0.7: Partially relevant
+      - <0.5: Mostly irrelevant
+      
+      **EMPATHY DETECTION:**
+      Look for empathy indicators: {empathy_phrases}
+      
+      **OUTPUT FORMAT:**
+      ```json
+      {{
+        "topic_relevance_pass": boolean,
+        "primary_intent": "detected intent category",
+        "coverage_ratio": number,
+        "addresses_main_concern": boolean,
+        "provides_solution": boolean,
+        "shows_empathy": boolean,
+        "relevance_issues": [
+          {{
+            "aspect": "what aspect of objection",
+            "coverage": "how well covered (none|partial|complete)",
+            "severity": "minor|major|critical",
+            "suggestion": "how to improve coverage"
+          }}
+        ],
+        "overall_reasoning": "detailed relevance assessment"
+      }}
+      ```
+    
+    variables:
+      - objection_text
+      - draft_response
+      - empathy_phrases
+
+# ===== CORRECTION PROMPTS =====
+
+correction_prompts:
+  # Generate correction feedback
+  correction_feedback:
+    template: |
+      Generate detailed correction feedback for failed verification:
+      
+      **ORIGINAL OBJECTION:**
+      {objection_text}
+      
+      **FAILED DRAFT:**
+      {failed_draft}
+      
+      **VERIFICATION ISSUES:**
+      {verification_issues}
+      
+      **CORRECTION REQUIREMENTS:**
+      
+      **For Price Issues:**
+      - Specify exact correct prices from database
+      - Explain price calculation if complex
+      - Note any promotional pricing rules
+      
+      **For Policy Issues:**
+      - Provide exact policy text from official documents
+      - Include proper citations and references
+      - Clarify any policy limitations or conditions
+      
+      **For Relevance Issues:**
+      - Identify missed aspects of customer objection
+      - Suggest specific points to address
+      - Recommend empathy statements if missing
+      
+      **OUTPUT FORMAT:**
+      ```json
+      {{
+        "correction_priority": "high|medium|low",
+        "critical_fixes_required": [
+          {{
+            "issue_type": "price|policy|relevance",
+            "current_problem": "what's wrong now",
+            "required_fix": "specific correction needed",
+            "example_text": "suggested replacement text"
+          }}
+        ],
+        "improvement_suggestions": [
+          {{
+            "area": "aspect to improve",
+            "suggestion": "how to improve",
+            "optional": boolean
+          }}
+        ],
+        "updated_prompt_instructions": "additional instructions for research agent",
+        "correction_reasoning": "why these corrections are needed"
+      }}
+      ```
+    
+    variables:
+      - objection_text
+      - failed_draft
+      - verification_issues
+
+# ===== ESCALATION PROMPTS =====
+
+escalation_prompts:
+  # Human escalation notification
+  escalation_notification:
+    template: |
+      ESCALATION REQUIRED: Verification Agent unable to achieve satisfactory result
+      
+      **ESCALATION DETAILS:**
+      - Workflow ID: {workflow_id}
+      - Retry Count: {retry_count}/{max_retries}
+      - Escalation Reason: {escalation_reason}
+      
+      **ORIGINAL OBJECTION:**
+      {objection_text}
+      
+      **FINAL DRAFT ATTEMPT:**
+      {final_draft}
+      
+      **PERSISTENT ISSUES:**
+      {persistent_issues}
+      
+      **EXECUTION LOG:**
+      {execution_log}
+      
+      **RECOMMENDED ACTIONS:**
+      1. Manual review of draft response quality
+      2. Assessment of objection complexity
+      3. Potential system configuration adjustments
+      4. Training data review if pattern emerges
+      
+      **PRIORITY LEVEL:** {priority_level}
+    
+    variables:
+      - workflow_id
+      - retry_count
+      - max_retries
+      - escalation_reason
+      - objection_text
+      - final_draft
+      - persistent_issues
+      - execution_log
+      - priority_level
+
+# ===== PROMPT CONFIGURATION =====
+
+prompt_settings:
+  # Global prompt settings
+  global:
+    max_prompt_length: 8000
+    include_examples: true
+    use_structured_output: true
+    enable_reasoning_chains: true
+  
+  # Language settings
+  language:
+    primary: "vietnamese"
+    fallback: "english"
+    mixed_language_support: true
+  
+  # Output formatting
+  output_format:
+    prefer_json: true
+    include_confidence_scores: false
+    detailed_explanations: true
+    
+  # Prompt optimization
+  optimization:
+    compress_examples: true
+    remove_redundant_instructions: true
+    use_bullet_points: true
+    
+# ===== ENVIRONMENT-SPECIFIC PROMPT OVERRIDES =====
+
+environment_overrides:
+  development:
+    prompt_settings:
+      global:
+        include_examples: true
+        enable_reasoning_chains: true
+    verification_prompts:
+      master_verification:
+        additional_instructions: |
+          **DEVELOPMENT MODE:**
+          - Provide extra detailed reasoning
+          - Include confidence scores for decisions
+          - Log intermediate analysis steps
+  
+  production:
+    prompt_settings:
+      global:
+        max_prompt_length: 6000  # Shorter for efficiency
+        include_examples: false
+    verification_prompts:
+      master_verification:
+        additional_instructions: |
+          **PRODUCTION MODE:**
+          - Focus on efficiency and accuracy
+          - Minimize token usage while maintaining quality
+          - Prioritize critical issue detection

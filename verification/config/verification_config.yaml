@@ -1,0 +1,231 @@
+# Verification Agent Configuration - Binary Verification System
+# Main configuration for binary PASS/FAIL verification thresholds
+# Supports the binary verification approach instead of 0-10 scoring
+
+# ===== BINARY VERIFICATION THRESHOLDS =====
+
+price_accuracy:
+  # Price accuracy tolerance settings
+  tolerance_percent: 1.0  # ±1% default tolerance for price matching
+  critical_threshold_percent: 30.0  # >30% deviation triggers critical issue
+  
+  # Price validation rules
+  required_fields:
+    - product_code
+    - price
+    - currency
+  
+  # Price matching configuration
+  fuzzy_matching_enabled: true
+  currency_conversion_enabled: true
+  
+  # Severity thresholds
+  severity_thresholds:
+    minor: 5.0    # 0-5% deviation = minor issue
+    major: 15.0   # 5-15% deviation = major issue  
+    critical: 30.0 # >30% deviation = critical issue
+  
+  # Pass/fail criteria
+  pass_criteria:
+    max_deviation_percent: 1.0
+    require_exact_match: false
+    allow_promotional_pricing: true
+
+policy_authenticity:
+  # Policy verification requirements
+  citation_required: true
+  source_verification_enabled: true
+  
+  # Required policy sources in internal DB
+  required_sources:
+    - warranty_policy
+    - return_policy
+    - exchange_policy
+    - service_terms
+  
+  # Forbidden phrases indicating fabricated policies
+  forbidden_phrases:
+    vietnamese:
+      - "tự bịa"
+      - "không có trong hệ thống"
+      - "theo ý kiến cá nhân"
+      - "chúng tôi nghĩ rằng"
+    english:
+      - "fabricated"
+      - "made up"
+      - "personal opinion"
+      - "we think that"
+      - "probably"
+      - "might be"
+  
+  # Policy validation rules
+  validation_rules:
+    require_specific_citations: true
+    check_policy_dates: true
+    verify_policy_scope: true
+    validate_terms_accuracy: true
+  
+  # Pass/fail criteria
+  pass_criteria:
+    all_policies_verified: true
+    no_fabricated_content: true
+    proper_citations_provided: true
+
+topic_relevance:
+  # Topic coverage requirements
+  min_coverage_ratio: 0.7  # 70% minimum coverage of objection topics
+  
+  # Intent detection configuration
+  required_intents:
+    - price_concern
+    - feature_question
+    - policy_inquiry
+    - comparison_request
+    - technical_support
+  
+  # Relevance scoring factors
+  scoring_factors:
+    direct_answer_weight: 0.4
+    context_understanding_weight: 0.3
+    solution_provided_weight: 0.2
+    empathy_bonus_weight: 0.1
+  
+  # Empathy detection
+  empathy_detection:
+    enabled: true
+    bonus_points: 0.1
+    required_phrases:
+      vietnamese:
+        - "tôi hiểu"
+        - "cảm ơn bạn"
+        - "rất tiếc"
+      english:
+        - "I understand"
+        - "thank you"
+        - "I apologize"
+  
+  # Pass/fail criteria
+  pass_criteria:
+    min_coverage_ratio: 0.7
+    addresses_main_concern: true
+    provides_actionable_solution: true
+
+# ===== CRITICAL ISSUE HANDLING =====
+
+critical_issues:
+  # Immediate escalation triggers
+  escalation_triggers:
+    price_deviation_over_30_percent: true
+    fabricated_policy_detected: true
+    completely_irrelevant_response: true
+    multiple_critical_issues: true  # ≥3 critical issues
+  
+  # Critical issue thresholds
+  thresholds:
+    max_critical_issues_before_escalation: 2
+    max_major_issues_before_escalation: 5
+    
+  # Early termination rules
+  early_termination:
+    enabled: true
+    stop_on_first_critical: false  # Continue to gather all issues
+    stop_on_multiple_critical: true  # Stop when ≥3 critical issues found
+
+# ===== VERIFICATION WEIGHTS =====
+
+verification_weights:
+  # Binary verification uses equal weighting by default
+  # Weights used for issue severity calculation only
+  price_accuracy: 0.4      # 40% weight - most critical for business
+  policy_authenticity: 0.3 # 30% weight - legal compliance
+  topic_relevance: 0.3     # 30% weight - customer satisfaction
+
+# ===== PERFORMANCE SETTINGS =====
+
+performance:
+  # Parallel execution settings
+  parallel_verification: true
+  max_concurrent_checks: 3
+  
+  # Timeout settings
+  verification_timeout_seconds: 30
+  individual_check_timeout_seconds: 10
+  
+  # Caching configuration
+  caching:
+    enabled: true
+    ttl_seconds: 3600  # 1 hour cache TTL
+    max_entries: 1000
+    cache_verification_results: true
+    cache_policy_lookups: true
+    cache_price_data: true
+
+# ===== RETRY CONFIGURATION =====
+
+retry_settings:
+  max_retries: 3
+  retry_backoff_seconds: 1.0
+  exponential_backoff: true
+  max_backoff_seconds: 10.0
+  
+  # Retry conditions
+  retry_on_timeout: true
+  retry_on_api_error: true
+  retry_on_db_error: true
+  
+  # Skip retry conditions
+  skip_retry_on_critical_issues: false
+  skip_retry_on_fabricated_policy: true
+
+# ===== LOGGING AND MONITORING =====
+
+logging:
+  level: INFO
+  detailed_verification_logs: true
+  log_verification_reasoning: true
+  log_performance_metrics: true
+  
+  # Structured logging fields
+  include_fields:
+    - timestamp
+    - verification_id
+    - objection_summary
+    - verification_result
+    - execution_time
+    - issues_found
+
+monitoring:
+  metrics_enabled: true
+  export_interval_seconds: 60
+  
+  # Key metrics to track
+  tracked_metrics:
+    - verification_success_rate
+    - average_verification_time
+    - critical_issues_per_hour
+    - retry_rate
+    - escalation_rate
+
+# ===== ENVIRONMENT OVERRIDES =====
+
+environment_overrides:
+  # Development environment settings
+  development:
+    price_accuracy:
+      tolerance_percent: 2.0  # More lenient in dev
+    logging:
+      level: DEBUG
+    performance:
+      verification_timeout_seconds: 60  # Longer timeout for debugging
+  
+  # Production environment settings  
+  production:
+    price_accuracy:
+      tolerance_percent: 0.5  # Stricter in production
+    critical_issues:
+      escalation_triggers:
+        price_deviation_over_30_percent: true
+    logging:
+      level: WARNING
+    performance:
+      verification_timeout_seconds: 15  # Faster timeout in production
