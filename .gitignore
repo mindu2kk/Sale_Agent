@@ -1,3 +1,7 @@
+# Markdown docs (keep only README.md)
+*.md
+!README.md
+
 # Environment variables & secrets
 .env
 .env.*
