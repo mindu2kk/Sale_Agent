@@ -105,20 +105,38 @@ sale-agent/
 │   │   └── execution.py            # Execution tracking models
 │   ├── config/                     # YAML configs + loaders
 │   ├── utils/                      # Shared utilities (cache, logging, metrics, etc.)
-│   ├── tests/                      # Verification unit tests
 │   └── api.py                      # FastAPI health + query endpoints
+│
+├── tests/                          # All tests (mirrors source structure)
+│   ├── agent/                      # Agent unit tests
+│   ├── verification/               # Verification module tests
+│   ├── test_unit.py                # Core unit tests
+│   ├── test_integration.py         # Integration tests
+│   ├── test_e2e_workflow.py        # End-to-end workflow tests
+│   └── test_pbt.py                 # Property-based tests
+│
+├── scripts/                        # One-off data & maintenance scripts
+│   ├── data_cleaning.py            # Raw catalog cleaning
+│   └── ingestion_pipeline.py       # Data ingestion into ChromaDB
+│
+├── examples/                       # Standalone usage examples
+│   ├── execution_tracking_example.py
+│   ├── logging_example.py
+│   ├── config_example_usage.py
+│   └── thresholds_example.py
 │
 ├── data/
 │   ├── product_catalog_clean.csv   # Cleaned product catalog
 │   └── Policies/                   # Warranty & return policy PDFs
 │
-├── tests/                          # Integration & E2E tests
-├── deploy/                         # Docker entrypoint + healthcheck scripts
-├── ingestion_pipeline.py           # Data ingestion into ChromaDB
-├── data_cleaning.py                # Raw catalog cleaning script
+├── docker/                         # Container configuration
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── start.sh
+│   └── healthcheck.sh
+│
 ├── rag_pipeline.py                 # RAGPipeline orchestrator
-├── Dockerfile
-├── docker-compose.yml
+├── pytest.ini
 └── requirements.txt
 ```
 
@@ -248,13 +266,13 @@ pytest --cov=. --cov-report=term-missing
 
 ```bash
 # Build and start all services
-docker-compose up --build
+docker-compose -f docker/docker-compose.yml up --build
 
 # Run in detached mode
-docker-compose up -d
+docker-compose -f docker/docker-compose.yml up -d
 
 # View logs
-docker-compose logs -f
+docker-compose -f docker/docker-compose.yml logs -f
 ```
 
 The API will be available at `http://localhost:8000`.
