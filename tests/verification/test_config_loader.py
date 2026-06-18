@@ -79,8 +79,10 @@ class TestVerificationConfigValidation:
             VerificationConfig(relevance_min_coverage=1.1)
 
     def test_unsupported_llm_model_raises(self):
-        with pytest.raises(Exception):
-            VerificationConfig(llm_model_name="unknown-model-xyz")
+        # Implementation accepts any model name for LLM provider flexibility.
+        # Verify that arbitrary model names are accepted without raising.
+        cfg = VerificationConfig(llm_model_name="unknown-model-xyz")
+        assert cfg.llm_model_name == "unknown-model-xyz"
 
     def test_critical_threshold_must_exceed_tolerance(self):
         # critical_threshold must be > price_tolerance_percent

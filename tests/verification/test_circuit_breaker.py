@@ -203,7 +203,7 @@ class TestFallbackLogic:
                 fallback=lambda: "fallback_result",
             )
 
-        result = asyncio.get_event_loop().run_until_complete(run())
+        result = asyncio.run(run())
         assert result == "fallback_result"
 
     def test_call_async_raises_circuit_open_error_without_fallback(self, cb):
@@ -214,7 +214,7 @@ class TestFallbackLogic:
             return await cb.call_async(lambda: "real_result")
 
         with pytest.raises(CircuitOpenError) as exc_info:
-            asyncio.get_event_loop().run_until_complete(run())
+            asyncio.run(run())
         assert exc_info.value.service_name == "test_service"
 
     def test_protect_context_manager_uses_fallback_when_open(self, cb):
@@ -225,7 +225,7 @@ class TestFallbackLogic:
             async with cb.protect(fallback=lambda: "cached") as result:
                 return result
 
-        result = asyncio.get_event_loop().run_until_complete(run())
+        result = asyncio.run(run())
         assert result == "cached"
 
     def test_protect_raises_circuit_open_error_without_fallback(self, cb):
@@ -237,7 +237,7 @@ class TestFallbackLogic:
                 pass
 
         with pytest.raises(CircuitOpenError):
-            asyncio.get_event_loop().run_until_complete(run())
+            asyncio.run(run())
 
 
 # ---------------------------------------------------------------------------
@@ -252,7 +252,7 @@ class TestAsyncSupport:
         async def run():
             return await cb.call_async(async_fn)
 
-        result = asyncio.get_event_loop().run_until_complete(run())
+        result = asyncio.run(run())
         assert result == "async_result"
 
     def test_call_async_with_sync_function(self, cb):
@@ -262,14 +262,14 @@ class TestAsyncSupport:
         async def run():
             return await cb.call_async(sync_fn)
 
-        result = asyncio.get_event_loop().run_until_complete(run())
+        result = asyncio.run(run())
         assert result == "sync_result"
 
     def test_call_async_records_success_on_success(self, cb):
         async def run():
             await cb.call_async(lambda: "ok")
 
-        asyncio.get_event_loop().run_until_complete(run())
+        asyncio.run(run())
         assert cb.get_status()["success_count"] == 1
         assert cb.get_status()["failure_count"] == 0
 
@@ -283,7 +283,7 @@ class TestAsyncSupport:
             except ValueError:
                 pass
 
-        asyncio.get_event_loop().run_until_complete(run())
+        asyncio.run(run())
         assert cb.get_status()["failure_count"] == 1
 
     def test_call_async_opens_circuit_after_threshold_async_failures(self, cb):
@@ -297,7 +297,7 @@ class TestAsyncSupport:
                 except ConnectionError:
                     pass
 
-        asyncio.get_event_loop().run_until_complete(run())
+        asyncio.run(run())
         assert cb.state == CircuitState.OPEN
 
     def test_protect_context_manager_records_success(self, cb):
@@ -305,7 +305,7 @@ class TestAsyncSupport:
             async with cb.protect():
                 pass  # no exception
 
-        asyncio.get_event_loop().run_until_complete(run())
+        asyncio.run(run())
         assert cb.get_status()["success_count"] == 1
 
     def test_protect_context_manager_records_failure(self, cb):
@@ -316,7 +316,7 @@ class TestAsyncSupport:
             except RuntimeError:
                 pass
 
-        asyncio.get_event_loop().run_until_complete(run())
+        asyncio.run(run())
         assert cb.get_status()["failure_count"] == 1
 
     def test_call_async_passes_args_and_kwargs(self, cb):
@@ -326,7 +326,7 @@ class TestAsyncSupport:
         async def run():
             return await cb.call_async(fn, 1, 2, c=3)
 
-        result = asyncio.get_event_loop().run_until_complete(run())
+        result = asyncio.run(run())
         assert result == 6
 
 

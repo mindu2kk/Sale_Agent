@@ -21,7 +21,7 @@ from verification.config.prompt_templates import (
     PromptTemplateError,
 )
 
-PROMPTS_PATH = Path(__file__).parent.parent / "config" / "prompts.yaml"
+PROMPTS_PATH = Path(__file__).parent.parent.parent / "verification" / "config" / "prompts.yaml"
 
 # ---------------------------------------------------------------------------
 # Fixtures

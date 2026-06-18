@@ -65,7 +65,7 @@ def _make_criteria(
     )
 
 
-def _make_verification_result(criteria: RubricCriteria, reasoning="ok") -> VerificationResult:
+def _make_verification_result(criteria: RubricCriteria, reasoning="Verification passed successfully.") -> VerificationResult:
     return VerificationResult(
         criteria=criteria,
         verification_reasoning=reasoning,
