@@ -80,6 +80,11 @@ desktop.ini
 # Docker
 *.dockerignore
 
+# SQLite databases (runtime data)
+*.db
+*.db-shm
+*.db-wal
+
 # Temporary files
 tmp/
 temp/

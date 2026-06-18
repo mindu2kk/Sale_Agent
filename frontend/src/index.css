@@ -1,44 +1,27 @@
-/* AI Sales Copilot — Design Tokens */
+/* Fonts - phải đặt đầu tiên */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
 
-:root {
-  /* Fluid mesh colors — deep purple/blue dark theme */
-  --bg-base: oklch(0.10 0.02 270);
-  --mesh-1: oklch(0.45 0.18 280);
-  --mesh-2: oklch(0.38 0.16 230);
-  --mesh-3: oklch(0.50 0.14 200);
-  --mesh-4: oklch(0.32 0.10 290);
-  --accent: oklch(0.72 0.18 260);
-  --accent-glow: oklch(0.78 0.22 270);
-  --core-ring: oklch(0.85 0.18 260);
-  --text-primary: oklch(0.98 0.01 0);
-  --text-muted: oklch(0.65 0.05 260);
-}
+/* Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@layer base {
+  :root {
+    /* Basic CSS variables */
+    --background: 220 15% 4%;
+    --foreground: 210 40% 98%;
+    --card: 220 15% 6%;
+    --card-foreground: 210 40% 98%;
+    --primary: 263 70% 50%;
+    --border: 215 25% 15%;
+    --ring: 263 70% 50%;
+    --radius: 0.75rem;
+  }
 
-html, body, #root {
-  height: 100%;
-  width: 100%;
-  background: var(--bg-base);
-  color: var(--text-primary);
-  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
-  overflow: hidden;
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  }
 }
-
-.theme-transition {
-  transition:
-    background 800ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 800ms cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 800ms cubic-bezier(0.4, 0, 0.2, 1),
-    color 800ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--core-ring) 30%, transparent); border-radius: 2px; }
