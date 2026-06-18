@@ -9,12 +9,36 @@ Hệ thống AI Agent thông minh giúp tư vấn bán hàng với khả năng:
 
 ## 🚀 Quick Start
 
-### Windows (1 lệnh duy nhất):
+### Cách 1: Docker (Khuyến nghị - Dễ nhất!) 🐳
+
+**Yêu cầu**: Chỉ cần Docker Desktop
+
+```bash
+# 1. Clone repository
+git clone https://github.com/mindu2kk/Sale_Agent.git
+cd Sale_Agent
+
+# 2. Tạo file .env (copy từ .env.example và điền API keys)
+cp .env.example .env
+
+# 3. Khởi động
+docker-compose up -d
+
+# 4. Truy cập
+# Frontend: http://localhost:5173
+# Backend: http://localhost:8000
+```
+
+👉 **Hướng dẫn chi tiết**: [HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md)
+
+### Cách 2: Local Scripts
+
+**Windows (1 lệnh duy nhất):**
 ```bash
 start.bat
 ```
 
-### Linux/Mac:
+**Linux/Mac:**
 ```bash
 chmod +x start.sh
 ./start.sh
@@ -26,18 +50,44 @@ Mở trình duyệt tại: **http://localhost:5173**
 
 ## 📋 Yêu Cầu Hệ Thống
 
-- **Python 3.10+** - https://www.python.org
-- **Node.js 18+** - https://nodejs.org
+### Với Docker (Khuyến nghị):
+- **Docker Desktop** - https://www.docker.com/products/docker-desktop
 - **API Keys:**
-  - Google Gemini API (hoặc OpenAI)
+  - Google Gemini API
   - Tavily API
   - LlamaCloud API
+
+### Với Local Development:
+- **Python 3.10+** - https://www.python.org
+- **Node.js 18+** - https://nodejs.org
+- **API Keys** (như trên)
 
 ---
 
 ## 🛠️ Installation
 
-### Cách 1: Startup Scripts (Khuyến nghị)
+### Cách 1: Docker Compose (Khuyến nghị - Ai cũng chạy được!)
+
+```bash
+# Build và start
+docker-compose up -d
+
+# Xem logs
+docker-compose logs -f
+
+# Dừng
+docker-compose down
+```
+
+**Windows Scripts:**
+```bash
+docker-start.bat   # Khởi động
+docker-stop.bat    # Dừng
+```
+
+👉 **Chi tiết**: [HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md)
+
+### Cách 2: Startup Scripts
 
 **Windows:**
 ```bash
@@ -49,19 +99,6 @@ stop.bat   # Dừng hệ thống
 ```bash
 ./start.sh  # Chạy toàn bộ hệ thống
 ./stop.sh   # Dừng hệ thống
-```
-
-### Cách 2: Docker Compose
-
-```bash
-# Build và start
-docker-compose up -d
-
-# Xem logs
-docker-compose logs -f
-
-# Dừng
-docker-compose down
 ```
 
 ### Cách 3: Manual
@@ -258,7 +295,10 @@ pytest tests/verification/
 
 ## 📚 Tài Liệu Bổ Sung
 
+- **[HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md)** - 🔥 Hướng dẫn chạy cho người mới (Docker)
 - **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Hướng dẫn deploy chi tiết
+- **[DOCKER_QUICK_START.md](DOCKER_QUICK_START.md)** - Docker quick start
+- **[HOW_TO_RUN_DOCKER.md](HOW_TO_RUN_DOCKER.md)** - Docker detailed guide
 - **[PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md)** - Tối ưu hóa hiệu suất
 - **[API_QUOTA_SOLUTION.md](API_QUOTA_SOLUTION.md)** - Xử lý lỗi API quota
 - **[STARTUP_OPTIMIZATION_RESULTS.md](STARTUP_OPTIMIZATION_RESULTS.md)** - Kết quả tối ưu
