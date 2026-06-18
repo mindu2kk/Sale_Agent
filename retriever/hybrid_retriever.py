@@ -120,7 +120,12 @@ class HybridRetriever:
         vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
         index = VectorStoreIndex.from_vector_store(vector_store)
 
-        embed_model = HuggingFaceEmbedding(model_name=self.embed_model_name)
+        # Use explicit cpu device to avoid "Cannot copy out of meta tensor" error
+        # that occurs with some PyTorch + sentence-transformers version combinations
+        embed_model = HuggingFaceEmbedding(
+            model_name=self.embed_model_name,
+            device="cpu",
+        )
         self._vector_retriever = index.as_retriever(
             similarity_top_k=self.vector_top_k,
             embed_model=embed_model,

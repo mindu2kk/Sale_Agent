@@ -72,8 +72,10 @@ policy_authenticity:
     proper_citations_provided: true
 
 topic_relevance:
-  # Topic coverage requirements
-  min_coverage_ratio: 0.7  # 70% minimum coverage of objection topics
+  # Topic coverage requirements — lowered to 0.3 for realistic chatbot use cases
+  # 0.7 was too strict: general product queries (e.g. "cần laptop gaming") would
+  # classify as general_inquiry with 0% coverage even with good responses
+  min_coverage_ratio: 0.3
   
   # Intent detection configuration
   required_intents:

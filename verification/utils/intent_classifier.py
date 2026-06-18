@@ -49,22 +49,34 @@ INTENT_TAXONOMY: Dict[str, Dict] = {
     },
     "feature": {
         "keywords": [
-            # Vietnamese
+            # Vietnamese — products
+            "laptop", "máy tính", "điện thoại", "tablet", "máy tính bảng",
+            "gaming", "game", "đồ họa", "render", "chơi game",
+            "tầm", "loại", "dòng", "model", "sản phẩm", "mua",
+            "cần", "muốn", "tìm", "giới thiệu", "gợi ý", "tư vấn",
+            # Vietnamese — specs
             "tính năng", "chức năng", "cấu hình", "thông số", "hiệu năng",
             "camera", "pin", "màn hình", "bộ nhớ", "ram", "chip", "cpu",
             "gpu", "loa", "âm thanh", "kết nối", "wifi", "bluetooth",
             "sạc", "dung lượng", "độ phân giải", "tốc độ",
             # English
+            "laptop", "phone", "tablet", "gaming", "recommend", "suggest",
+            "need", "want", "looking for", "best",
             "feature", "spec", "performance", "specification", "display",
             "screen", "battery", "storage", "processor", "resolution",
             "connectivity", "charging", "capacity",
         ],
         "weight": 0.15,
         "patterns": [
+            r"(?:cần|muốn|tìm|mua)\s+(?:laptop|điện thoại|tablet|máy tính)",
+            r"laptop\s+(?:gaming|đồ họa|văn phòng|sinh viên)",
+            r"tầm\s+\d+\s+(?:triệu|tr|million)",
+            r"(?:gợi ý|tư vấn|giới thiệu)\s+(?:cho tôi|mình|em)",
             r"tính năng\s+(?:gì|như thế nào|có gì)",
             r"(?:camera|pin|màn hình)\s+(?:như thế nào|tốt không|bao nhiêu)",
             r"(?:specs?|specifications?)\s+(?:of|for)",
             r"how\s+(?:good|fast|long)\s+is\s+the",
+            r"(?:recommend|suggest)\s+(?:a|an|the|me|some)",
         ],
     },
     "comparison": {

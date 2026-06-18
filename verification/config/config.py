@@ -271,13 +271,8 @@ class VerificationConfig(BaseModel):
     
     @validator('llm_model_name')
     def validate_llm_model(cls, v):
-        """Validate supported LLM models"""
-        supported_models = [
-            "gpt-4", "gpt-4-turbo", "gpt-3.5-turbo",
-            "claude-3-opus", "claude-3-sonnet", "claude-3-haiku"
-        ]
-        if v not in supported_models:
-            raise ValueError(f"Unsupported model: {v}. Supported: {supported_models}")
+        """Validate supported LLM models — accepts any model name for flexibility."""
+        # Allow any model name so we can swap LLM providers (Gemini, OpenAI, Anthropic, etc.)
         return v
     
     # === HELPER METHODS ===
