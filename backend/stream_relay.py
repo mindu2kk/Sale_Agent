@@ -63,6 +63,15 @@ async def stream_workflow(
     if not response_text:
         response_text = "Xin lỗi, tôi không thể xử lý câu hỏi này lúc này."
 
+    # Check execution log for research node errors (API quota, etc.)
+    execution_log = final_state.get("execution_log", [])
+    research_error = None
+    for step in execution_log:
+        # ExecutionStep is a Pydantic model, use attribute access not .get()
+        if hasattr(step, 'node_name') and step.node_name == "research" and step.status == "failed":
+            research_error = getattr(step, 'error_details', "")
+            break
+
     # Handle failed workflow (e.g., API quota exhausted)
     if workflow_status == "failed":
         # Check if this is an API quota error
@@ -77,7 +86,20 @@ async def stream_workflow(
                 "Xin lỗi, đã xảy ra lỗi kỹ thuật khi xử lý yêu cầu. "
                 "Vui lòng thử lại sau."
             )
-    # Handle escalation
+    # Handle escalation due to research node failure (API quota)
+    elif workflow_status == "escalated" and research_error:
+        # Check if escalation was due to research node API quota error
+        if "quota" in research_error.lower() or "api" in research_error.lower():
+            response_text = (
+                "Xin lỗi, hệ thống tạm thời không thể xử lý yêu cầu do giới hạn API. "
+                "Vui lòng thử lại sau hoặc liên hệ quản trị viên."
+            )
+        else:
+            response_text = (
+                "Xin lỗi, đã xảy ra lỗi kỹ thuật khi xử lý yêu cầu. "
+                "Vui lòng thử lại sau."
+            )
+    # Handle normal escalation (legitimate human review needed)
     elif workflow_status == "escalated":
         response_text = (
             "Câu hỏi của bạn cần được xử lý bởi chuyên viên tư vấn. "

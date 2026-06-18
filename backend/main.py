@@ -60,31 +60,18 @@ _metrics_cache_time = 0.0
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Init DB and pre-load AI workflow on startup."""
+    """Init DB only. AI workflow will load lazily on first request (~60s wait)."""
     from backend.database import init_db
 
     logger.info("Starting up API Gateway...")
     await init_db()
     logger.info("Database initialised ✓")
 
-    # Pre-load workflow in a background thread — don't block startup
-    # (BAAI/bge-m3 embedding model can take 30-60s to load on first run)
-    import threading
-
-    def _preload():
-        try:
-            from backend.workflow_factory import get_workflow
-            get_workflow()
-            logger.info("AI workflow pre-loaded ✓")
-        except Exception as exc:
-            logger.warning(
-                "AI workflow pre-load failed (will show error on /api/chat): %s", exc
-            )
-
-    t = threading.Thread(target=_preload, daemon=True, name="workflow-preload")
-    t.start()
-
+    # LAZY LOADING: Workflow sẽ load khi có request đầu tiên
+    # Giúp backend khởi động ngay lập tức thay vì chờ 60s
     logger.info("API Gateway ready — listening on http://0.0.0.0:8000")
+    logger.info("AI workflow will load on first request (expect ~60s delay)")
+    
     yield
     logger.info("Shutting down...")
 

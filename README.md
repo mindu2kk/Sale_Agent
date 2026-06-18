@@ -1,290 +1,402 @@
-# Sale Agent
+# 🤖 AI Sales Copilot
 
-An AI-powered sales assistant that handles customer objections in real time. The system combines a **Hybrid RAG pipeline** for product and policy retrieval with a **LangGraph verification workflow** that automatically checks, corrects, and approves agent responses before they reach the customer.
+Hệ thống AI Agent thông minh giúp tư vấn bán hàng với khả năng:
+- 🔍 Tìm kiếm thông tin sản phẩm từ database nội bộ
+- 🌐 Tra cứu thông tin bổ sung từ Internet (Tavily)
+- ✅ Tự động verify độ chính xác của câu trả lời
+- 🔄 Self-correction khi phát hiện lỗi
+- 📊 Escalate lên human khi cần thiết
 
----
+## 🚀 Quick Start
 
-## Table of Contents
-
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Running Tests](#running-tests)
-- [Docker](#docker)
-- [Contributing](#contributing)
-
----
-
-## Overview
-
-| Component | Description |
-|---|---|
-| **RAG Pipeline** | Routes customer queries through a relevance checker, then retrieves context via hybrid BM25 + vector search |
-| **Sales Research Agent** | LlamaIndex ReAct agent that uses internal product DB and Tavily web search to draft responses |
-| **Verification Agent** | LangGraph workflow that validates price accuracy, policy authenticity, and response relevance |
-| **Self-Correction Loop** | Automatically retries with structured feedback when verification fails |
-
----
-
-## Architecture
-
-```
-Customer Objection
-       │
-       ▼
-┌─────────────────┐
-│  Relevance      │  NO_MATCH → default response
-│  Checker        │
-└────────┬────────┘
-         │ CAN_ANSWER / PARTIAL
-         ▼
-┌─────────────────┐
-│  Hybrid         │  BM25 + ChromaDB vector search
-│  Retriever      │
-└────────┬────────┘
-         │ retrieved context
-         ▼
-┌─────────────────┐
-│  Sales Research │  ReAct agent (internal DB + Tavily)
-│  Agent          │
-└────────┬────────┘
-         │ draft response
-         ▼
-┌─────────────────────────────────────┐
-│  Verification Workflow (LangGraph)  │
-│                                     │
-│  ┌──────────┐   ┌────────────────┐  │
-│  │ Checkers │──▶│ Binary Decision│  │
-│  │ - Price  │   │ PASS / FAIL    │  │
-│  │ - Policy │   └───────┬────────┘  │
-│  │ - Relevance          │           │
-│  └──────────┘    PASS ──┤── FAIL    │
-│                         │      │    │
-│                    APPROVED  Self-  │
-│                           Correction│
-│                           Loop (max │
-│                           retries)  │
-└─────────────────────────────────────┘
-         │
-         ▼
-  Final Response
+### Windows (1 lệnh duy nhất):
+```bash
+start.bat
 ```
 
----
-
-## Project Structure
-
-```
-sale-agent/
-├── agent/                          # Sales Research Agent
-│   ├── sales_research_agent.py     # ReAct agent + AgentResult dataclass
-│   ├── tools.py                    # Internal DB tool + Tavily tool builders
-│   ├── prompts.py                  # System prompt + correction context builder
-│   └── cache.py                    # Response caching
-│
-├── retriever/                      # Hybrid Retrieval
-│   ├── hybrid_retriever.py         # BM25 + ChromaDB fusion retriever
-│   └── relevance_checker.py        # Query relevance classifier
-│
-├── verification/                   # Verification Workflow
-│   ├── agent/
-│   │   ├── verification_agent.py   # LangGraph verification agent
-│   │   └── checkers.py             # Price, policy, relevance checkers
-│   ├── workflow/
-│   │   ├── workflow.py             # LangGraph StateGraph definition
-│   │   ├── routing.py              # Conditional edge routing logic
-│   │   ├── correction.py           # Self-correction node
-│   │   └── persistence.py          # Workflow state persistence
-│   ├── models/
-│   │   ├── state.py                # WorkflowState TypedDict
-│   │   ├── verification.py         # VerificationResult + issue models
-│   │   └── execution.py            # Execution tracking models
-│   ├── config/                     # YAML configs + loaders
-│   ├── utils/                      # Shared utilities (cache, logging, metrics, etc.)
-│   └── api.py                      # FastAPI health + query endpoints
-│
-├── tests/                          # All tests (mirrors source structure)
-│   ├── agent/                      # Agent unit tests
-│   ├── verification/               # Verification module tests
-│   ├── test_unit.py                # Core unit tests
-│   ├── test_integration.py         # Integration tests
-│   ├── test_e2e_workflow.py        # End-to-end workflow tests
-│   └── test_pbt.py                 # Property-based tests
-│
-├── scripts/                        # One-off data & maintenance scripts
-│   ├── data_cleaning.py            # Raw catalog cleaning
-│   └── ingestion_pipeline.py       # Data ingestion into ChromaDB
-│
-├── examples/                       # Standalone usage examples
-│   ├── execution_tracking_example.py
-│   ├── logging_example.py
-│   ├── config_example_usage.py
-│   └── thresholds_example.py
-│
-├── data/
-│   ├── product_catalog_clean.csv   # Cleaned product catalog
-│   └── Policies/                   # Warranty & return policy PDFs
-│
-├── docker/                         # Container configuration
-│   ├── Dockerfile
-│   ├── docker-compose.yml
-│   ├── start.sh
-│   └── healthcheck.sh
-│
-├── rag_pipeline.py                 # RAGPipeline orchestrator
-├── pytest.ini
-└── requirements.txt
+### Linux/Mac:
+```bash
+chmod +x start.sh
+./start.sh
 ```
 
----
-
-## Prerequisites
-
-- Python 3.10+
-- [uv](https://docs.astral.sh/uv/) or pip
-- Docker & Docker Compose (for containerized deployment)
-- API keys for:
-  - Google Gemini (`GOOGLE_API_KEY`)
-  - Tavily Search (`TAVILY_API_KEY`)
-  - LlamaCloud (`LLAMA_CLOUD_API_KEY`)
+Mở trình duyệt tại: **http://localhost:5173**
 
 ---
 
-## Installation
+## 📋 Yêu Cầu Hệ Thống
+
+- **Python 3.10+** - https://www.python.org
+- **Node.js 18+** - https://nodejs.org
+- **API Keys:**
+  - Google Gemini API (hoặc OpenAI)
+  - Tavily API
+  - LlamaCloud API
+
+---
+
+## 🛠️ Installation
+
+### Cách 1: Startup Scripts (Khuyến nghị)
+
+**Windows:**
+```bash
+start.bat  # Chạy toàn bộ hệ thống
+stop.bat   # Dừng hệ thống
+```
+
+**Linux/Mac:**
+```bash
+./start.sh  # Chạy toàn bộ hệ thống
+./stop.sh   # Dừng hệ thống
+```
+
+### Cách 2: Docker Compose
 
 ```bash
-# Clone the repository
-git clone https://github.com/mindu2kk/Sale_Agent.git
-cd Sale_Agent
+# Build và start
+docker-compose up -d
 
-# Create and activate a virtual environment
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # macOS/Linux
+# Xem logs
+docker-compose logs -f
 
-# Install dependencies
+# Dừng
+docker-compose down
+```
+
+### Cách 3: Manual
+
+**Terminal 1 - Backend:**
+```bash
 pip install -r requirements.txt
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Xem chi tiết: **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)**
+
+---
+
+## 📁 Cấu Trúc Dự Án
+
+```
+DuAnTTCS/
+├── agent/                    # Sales Research Agent (LlamaIndex + ReAct)
+│   ├── sales_research_agent.py
+│   ├── tools.py
+│   └── prompts.py
+│
+├── verification/             # Verification Agent (LangGraph workflow)
+│   ├── agent/                # Verification logic
+│   ├── workflow/             # LangGraph routing, correction
+│   ├── models/               # Pydantic models
+│   ├── config/               # Configuration files
+│   └── utils/                # Utilities (logging, caching, etc.)
+│
+├── retriever/                # Hybrid Retriever (BM25 + Vector)
+│   ├── hybrid_retriever.py
+│   └── relevance_checker.py
+│
+├── backend/                  # FastAPI API Gateway
+│   ├── main.py               # API endpoints
+│   ├── stream_relay.py       # SSE streaming
+│   ├── database.py           # SQLite chat history
+│   └── workflow_factory.py   # Workflow initialization
+│
+├── frontend/                 # React + TypeScript UI
+│   ├── src/
+│   │   ├── components/
+│   │   ├── services/
+│   │   └── App.tsx
+│   └── package.json
+│
+├── tests/                    # Test suites (2601 tests)
+│   ├── test_unit.py
+│   ├── test_integration.py
+│   └── verification/
+│
+├── chroma_db/                # Vector store (ChromaDB)
+├── chat.db                   # Chat history (SQLite)
+├── .env                      # API keys and config
+├── requirements.txt          # Python dependencies
+│
+├── start.bat / start.sh      # Startup scripts
+├── stop.bat / stop.sh        # Stop scripts
+├── docker-compose.yml        # Docker configuration
+└── README.md                 # This file
 ```
 
 ---
 
-## Configuration
+## 🎯 Kiến Trúc Hệ Thống
 
-Copy the example env file and fill in your API keys:
-
-```bash
-cp .env.example .env
 ```
-
-```dotenv
-# .env
-GOOGLE_API_KEY=your_google_api_key
-TAVILY_API_KEY=your_tavily_api_key
-LLAMA_CLOUD_API_KEY=your_llama_cloud_api_key
-```
-
-Verification thresholds and workflow behaviour are controlled via YAML files in `verification/config/`:
-
-| File | Purpose |
-|---|---|
-| `thresholds.yaml` | Confidence thresholds for price / policy / relevance checks |
-| `verification_config.yaml` | Max retries, timeout, escalation rules |
-| `workflow_config.yaml` | LangGraph node configuration |
-| `logging_config.yaml` | Log levels and output format |
-| `environments/` | Per-environment overrides (development / test / production) |
-
----
-
-## Usage
-
-### 1. Ingest data
-
-Load the product catalog and policy PDFs into ChromaDB:
-
-```bash
-python ingestion_pipeline.py
-```
-
-### 2. Run the API server
-
-```bash
-uvicorn verification.api:app --host 0.0.0.0 --port 8000 --reload
-```
-
-Endpoints:
-
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/health` | Health check |
-| `POST` | `/query` | Submit a customer objection |
-
-### 3. Direct Python usage
-
-```python
-from retriever.hybrid_retriever import HybridRetriever
-from retriever.relevance_checker import RelevanceChecker
-from rag_pipeline import RAGPipeline
-from agent.sales_research_agent import SalesResearchAgent
-
-retriever = HybridRetriever(...)
-checker = RelevanceChecker(...)
-rag = RAGPipeline(retriever=retriever, checker=checker)
-
-agent = SalesResearchAgent(llm=llm, rag_pipeline=rag, tavily_api_key="...")
-result = agent.run("Sản phẩm này có bảo hành không?")
-print(result.draft_response)
+┌─────────────────┐
+│   User/Browser  │
+└────────┬────────┘
+         │ HTTP
+         ▼
+┌─────────────────────────────────────────────────────┐
+│            Frontend (React + TypeScript)             │
+│  • Real-time chat UI                                │
+│  • SSE streaming                                    │
+│  • Message history                                  │
+└──────────────────────┬──────────────────────────────┘
+                       │ SSE
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│          Backend (FastAPI API Gateway)               │
+│  • Auth (Bearer token)                              │
+│  • Chat threads management                          │
+│  • SSE streaming relay                              │
+│  • Health checks                                    │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│       Verification Workflow (LangGraph)              │
+│                                                      │
+│   ┌──────────────┐       ┌──────────────┐          │
+│   │   Research   │──────▶│ Verification │          │
+│   │     Node     │       │     Node     │          │
+│   └──────────────┘       └──────┬───────┘          │
+│          │                      │                   │
+│          │                      ▼                   │
+│          │              ┌───────────────┐           │
+│          │              │   Approved?   │           │
+│          │              └───────┬───────┘           │
+│          │                      │                   │
+│          │           ┌──────────┴──────────┐        │
+│          │           │                     │        │
+│          │           ▼                     ▼        │
+│          │    ┌──────────┐         ┌──────────┐    │
+│          └───▶│Correction│         │Escalation│    │
+│               │   Node   │         │   Node   │    │
+│               └──────────┘         └──────────┘    │
+│                                                      │
+└──────────────────────┬──────────────────────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         ▼                           ▼
+┌──────────────────┐      ┌──────────────────┐
+│ Research Agent   │      │ Vector Store     │
+│ (LlamaIndex)     │      │ (ChromaDB)       │
+│                  │      │                  │
+│ • Internal DB    │      │ • BM25 search    │
+│ • Tavily search  │      │ • Vector search  │
+│ • ReAct loop     │      │ • Hybrid ranking │
+└──────────────────┘      └──────────────────┘
 ```
 
 ---
 
-## Running Tests
+## ⚙️ Cấu Hình
+
+### File `.env`
+
+```env
+# API Keys
+LLAMA_CLOUD_API_KEY=llx-...
+GOOGLE_API_KEY=AQ.Ab8RN6JF...
+TAVILY_API_KEY=tvly-dev-...
+
+# API Gateway
+API_BEARER_TOKEN=dev-token-123
+FRONTEND_URL=http://localhost:5173
+
+# LLM Model
+LLM_MODEL=gemini-2.5-flash  # hoặc gemini-1.5-pro, gpt-4, etc.
+```
+
+### Thay đổi cấu hình nâng cao:
+
+- **Verification thresholds:** `verification/config/thresholds.yaml`
+- **Prompts:** `verification/config/prompts.yaml`
+- **Workflow config:** `verification/config/workflow_config.yaml`
+- **Logging:** `verification/config/logging_config.yaml`
+
+---
+
+## 🧪 Testing
 
 ```bash
-# All tests
+# Chạy toàn bộ test suite (2601 tests)
 pytest
 
-# Unit tests only
+# Chạy với coverage
+pytest --cov=. --cov-report=html
+
+# Chạy tests cụ thể
 pytest tests/test_unit.py
-
-# Integration tests
-pytest tests/test_integration.py
-
-# Verification module tests
-pytest verification/tests/
-
-# With coverage
-pytest --cov=. --cov-report=term-missing
+pytest tests/verification/
 ```
+
+**Test results:** 2601 tests passed ✅
 
 ---
 
-## Docker
+## 📊 Performance
+
+### Backend Startup Time:
+- **Before optimization:** ~60 giây
+- **After lazy loading:** ~0.1 giây (100ms) ✅
+- **First request:** ~60 giây (load AI workflow)
+- **Subsequent requests:** Instant ✅
+
+### Response Time:
+- **Simple queries:** 2-5 giây
+- **Complex queries (web search):** 5-10 giây
+- **With verification:** +2-3 giây
+
+---
+
+## 📚 Tài Liệu Bổ Sung
+
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Hướng dẫn deploy chi tiết
+- **[PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md)** - Tối ưu hóa hiệu suất
+- **[API_QUOTA_SOLUTION.md](API_QUOTA_SOLUTION.md)** - Xử lý lỗi API quota
+- **[STARTUP_OPTIMIZATION_RESULTS.md](STARTUP_OPTIMIZATION_RESULTS.md)** - Kết quả tối ưu
+- **[HYBRID_RETRIEVER_EXPLAINED.md](HYBRID_RETRIEVER_EXPLAINED.md)** - Giải thích Hybrid Retriever
+- **[SALES_RESEARCH_AGENT_EXPLAINED.md](SALES_RESEARCH_AGENT_EXPLAINED.md)** - Giải thích Research Agent
+- **[VERIFICATION_AGENT_EXPLAINED.md](VERIFICATION_AGENT_EXPLAINED.md)** - Giải thích Verification Agent
+
+---
+
+## 🐛 Troubleshooting
+
+### Port đã được sử dụng:
+
+**Windows:**
+```bash
+netstat -ano | findstr :8000
+taskkill /F /PID <PID>
+```
+
+**Linux/Mac:**
+```bash
+lsof -ti:8000 | xargs kill -9
+```
+
+### API Quota exhausted:
+
+Thêm `OPENAI_API_KEY` vào `.env` để dùng OpenAI thay vì Gemini:
+```env
+OPENAI_API_KEY=sk-...
+LLM_MODEL=gpt-4
+```
+
+### Dependencies issues:
 
 ```bash
-# Build and start all services
-docker-compose -f docker/docker-compose.yml up --build
+# Python
+pip install --upgrade -r requirements.txt
 
-# Run in detached mode
-docker-compose -f docker/docker-compose.yml up -d
-
-# View logs
-docker-compose -f docker/docker-compose.yml logs -f
+# Node.js
+cd frontend && rm -rf node_modules && npm install
 ```
-
-The API will be available at `http://localhost:8000`.
 
 ---
 
-## Contributing
+## 🚢 Production Deployment
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m "feat: add your feature"`
-4. Push to the branch: `git push origin feature/your-feature`
+### Với Docker Compose:
+
+```bash
+# 1. Build images
+docker-compose build
+
+# 2. Start services
+docker-compose up -d
+
+# 3. Check status
+docker-compose ps
+
+# 4. View logs
+docker-compose logs -f
+```
+
+### Với Nginx Reverse Proxy:
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    # Frontend
+    location / {
+        proxy_pass http://localhost:5173;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Backend API
+    location /api {
+        proxy_pass http://localhost:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # SSE support
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 300s;
+    }
+}
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the project
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
 5. Open a Pull Request
 
-Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
+---
+
+## 📝 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 👥 Authors
+
+- **Your Name** - Initial work
+
+---
+
+## 🙏 Acknowledgments
+
+- LlamaIndex - RAG framework
+- LangGraph - Agent workflow orchestration
+- FastAPI - Modern web framework
+- React - Frontend library
+- ChromaDB - Vector database
+
+---
+
+## 📞 Support
+
+Nếu gặp vấn đề, vui lòng:
+1. Xem [Troubleshooting](#-troubleshooting)
+2. Đọc [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+3. Tạo GitHub Issue
+4. Liên hệ: your.email@example.com
+
+---
+
+**Made with ❤️ by AI Sales Copilot Team**

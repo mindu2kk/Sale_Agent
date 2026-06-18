@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # Backend service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: sales-copilot-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - LLAMA_CLOUD_API_KEY=${LLAMA_CLOUD_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - API_BEARER_TOKEN=${API_BEARER_TOKEN}
+      - FRONTEND_URL=http://localhost:5173
+      - LLM_MODEL=${LLM_MODEL}
+    volumes:
+      # Persist database and vector store
+      - ./chroma_db:/app/chroma_db
+      - ./chat.db:/app/chat.db
+      - ./logs:/app/logs
+      # Mount code for hot reload (optional, comment out in production)
+      - ./agent:/app/agent
+      - ./backend:/app/backend
+      - ./verification:/app/verification
+      - ./retriever:/app/retriever
+      - ./.env:/app/.env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: sales-copilot-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    volumes:
+      # Mount code for hot reload
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    restart: unless-stopped
+
+networks:
+  default:
+    name: sales-copilot-network
