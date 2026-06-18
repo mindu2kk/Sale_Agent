@@ -137,6 +137,22 @@ class SalesResearchAgent:
             )
         except Exception as exc:
             logger.error("Agent error: %s", exc, exc_info=True)
+            
+            # Check if this is an API quota error
+            exc_str = str(exc).lower()
+            is_quota_error = any(keyword in exc_str for keyword in [
+                "quota", "429", "resource_exhausted", "rate limit"
+            ])
+            
+            if is_quota_error:
+                # For quota errors, raise the exception so the workflow can handle it properly
+                # instead of returning a misleading escalation message
+                logger.error("API quota exhausted - raising exception for proper error handling")
+                raise RuntimeError(
+                    "API quota exhausted. Please wait for quota reset or add OPENAI_API_KEY to .env"
+                ) from exc
+            
+            # For other errors, return a generic technical error message
             return AgentResult(
                 objection_text=objection,
                 draft_response="Dạ, hiện tại hệ thống đang gặp sự cố kỹ thuật. Xin phép ghi nhận để báo cáo quản lý ạ.",
