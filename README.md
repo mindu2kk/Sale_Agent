@@ -1,251 +1,442 @@
-# AURA AI Sales Advisor
+# 🤖 AI Sales Copilot
 
-AURA AI Sales Advisor là hệ thống thương mại điện tử có trợ lý tư vấn mua sắm bằng AI, tập trung vào sản phẩm công nghệ như laptop và điện thoại. Dự án kết hợp giao diện catalog sản phẩm với một AI Advisor có khả năng hiểu câu hỏi tiếng Việt, lọc sản phẩm theo nhu cầu, giữ ngữ cảnh hội thoại, so sánh sản phẩm và trả lời dựa trên dữ liệu catalog thật.
+Hệ thống AI Agent thông minh giúp tư vấn bán hàng với khả năng:
+- 🔍 Tìm kiếm thông tin sản phẩm từ database nội bộ
+- 🌐 Tra cứu thông tin bổ sung từ Internet (Tavily)
+- ✅ Tự động verify độ chính xác của câu trả lời
+- 🔄 Self-correction khi phát hiện lỗi
+- 📊 Escalate lên human khi cần thiết
 
-Điểm quan trọng của dự án là kiểm soát hành vi AI. Trợ lý không trả lời tự do theo mô hình ngôn ngữ, mà đi qua các lớp định tuyến intent, query frame, truy xuất catalog, giải quyết tham chiếu sản phẩm, kiểm chứng câu trả lời và ràng buộc đồng bộ giữa nội dung chat với thẻ sản phẩm.
+## 🚀 Quick Start
 
-## Tính Năng Chính
+### Cách 1: Docker (Khuyến nghị - Dễ nhất!) 🐳
 
-- Hiển thị catalog sản phẩm công nghệ.
-- Tìm kiếm và lọc theo hãng, danh mục, giá, CPU, GPU, RAM, SSD, kích thước màn hình và nhu cầu sử dụng.
-- Tư vấn mua sắm bằng tiếng Việt.
-- Hiểu ngữ cảnh hội thoại như "mẫu đó", "máy này", "2 mẫu vừa hỏi", "cùng tầm giá".
-- Phân tích chi tiết một sản phẩm dựa trên dữ liệu catalog.
-- Đánh giá sản phẩm theo nhu cầu cụ thể như văn phòng, học tập, gaming hoặc đồ họa nhẹ.
-- So sánh sản phẩm bằng dữ liệu có căn cứ.
-- Đồng bộ câu trả lời AI với danh sách sản phẩm liên quan trong giao diện.
-- Kiểm tra câu trả lời để hạn chế lệch sản phẩm, bịa thông số hoặc kết luận khi thiếu dữ liệu.
-
-## Kiến Trúc Tổng Quan
-
-```mermaid
-flowchart LR
-    User["Người dùng / Trình duyệt"] --> Frontend["Frontend React + TypeScript"]
-    Frontend --> API["FastAPI Backend"]
-    API --> Catalog["Catalog Service"]
-    API --> Advisor["AI Advisor"]
-    Advisor --> Agent["Deterministic Agent"]
-    Agent --> Intent["Intent Router"]
-    Agent --> Frame["Query Frame"]
-    Agent --> Resolver["Product Resolver"]
-    Agent --> Search["Catalog Search"]
-    Agent --> Composer["Response Composer"]
-    Agent --> Verifier["Verifier / Guardrails"]
-    Catalog --> Data["CSV Catalog + Product Images"]
-    Verifier --> Contract["Structured Response Contract"]
-    Contract --> Frontend
-```
-
-## Cấu Trúc Thư Mục
-
-```text
-.
-├── backend/
-│   ├── api/              # FastAPI entrypoint và route API
-│   ├── agent/            # Intent router, query frame, resolver, composer, verifier
-│   ├── services/         # Catalog, conversation, ranking, observability
-│   ├── harness/          # Runtime, governance, fallback, trace, preflight/postflight
-│   ├── retrieval/        # Các thành phần truy xuất dữ liệu
-│   ├── verification/     # Workflow và tiện ích kiểm chứng
-│   └── workflows/        # Research/sales workflow
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/   # Storefront, copilot drawer, UI components
-│   │   ├── stores/       # Zustand stores
-│   │   ├── types/        # TypeScript contracts
-│   │   ├── lib/          # Tiện ích frontend
-│   │   └── data/         # Dữ liệu/hằng số phía client
-│   └── package.json
-│
-├── data/                 # Catalog, ảnh sản phẩm, dữ liệu chính sách
-├── docs/                 # Tài liệu thiết kế và triển khai
-├── scripts/              # Script crawl/enrich/validate catalog
-├── tests/                # Unit, integration, API contract và regression tests
-├── requirements.txt      # Dependency Python
-├── docker-compose.yml    # Cấu hình chạy bằng Docker
-├── Dockerfile.backend
-├── Dockerfile.frontend
-└── README.md
-```
-
-## Yêu Cầu Môi Trường
-
-- Python 3.10 trở lên.
-- Node.js 18 trở lên.
-- npm.
-- Git.
-
-Chế độ chạy local mặc định dùng logic catalog có kiểm soát, không bắt buộc phải có API key LLM.
-
-## Cấu Hình Môi Trường
-
-Tạo file `.env` từ mẫu:
+**Yêu cầu**: Chỉ cần Docker Desktop
 
 ```bash
+# 1. Clone repository
+git clone https://github.com/mindu2kk/Sale_Agent.git
+cd Sale_Agent
+
+# 2. Tạo file .env (copy từ .env.example và điền API keys)
 cp .env.example .env
+
+# 3. Khởi động
+docker-compose up -d
+
+# 4. Truy cập
+# Frontend: http://localhost:5173
+# Backend: http://localhost:8000
 ```
 
-Trên Windows PowerShell:
+👉 **Hướng dẫn chi tiết**: [HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md)
 
-```powershell
-Copy-Item .env.example .env
+### Cách 2: Local Scripts
+
+**Windows (1 lệnh duy nhất):**
+```bash
+start.bat
 ```
 
-Một số biến môi trường thường dùng:
-
-```env
-PRODUCT_CATALOG_PATH=./data/product_catalog_real.csv
-ENABLE_EXTERNAL_AI_WORKFLOW=false
-ENABLE_LLM_DECISION_PHRASING=false
-AGENT_SHADOW_MODE=false
-EXPOSE_DECISION_TRACE=false
+**Linux/Mac:**
+```bash
+chmod +x start.sh
+./start.sh
 ```
 
-Không commit file `.env`, database local, log, cache hoặc API key thật lên GitHub.
+Mở trình duyệt tại: **http://localhost:5173**
 
-## Chạy Dự Án Local
+---
 
-### 1. Cài dependency backend
+## 📋 Yêu Cầu Hệ Thống
 
+### Với Docker (Khuyến nghị):
+- **Docker Desktop** - https://www.docker.com/products/docker-desktop
+- **API Keys:**
+  - Google Gemini API
+  - Tavily API
+  - LlamaCloud API
+
+### Với Local Development:
+- **Python 3.10+** - https://www.python.org
+- **Node.js 18+** - https://nodejs.org
+- **API Keys** (như trên)
+
+---
+
+## 🛠️ Installation
+
+### Cách 1: Docker Compose (Khuyến nghị - Ai cũng chạy được!)
+
+```bash
+# Build và start
+docker-compose up -d
+
+# Xem logs
+docker-compose logs -f
+
+# Dừng
+docker-compose down
+```
+
+**Windows Scripts:**
+```bash
+docker-start.bat   # Khởi động
+docker-stop.bat    # Dừng
+```
+
+👉 **Chi tiết**: [HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md)
+
+### Cách 2: Startup Scripts
+
+**Windows:**
+```bash
+start.bat  # Chạy toàn bộ hệ thống
+stop.bat   # Dừng hệ thống
+```
+
+**Linux/Mac:**
+```bash
+./start.sh  # Chạy toàn bộ hệ thống
+./stop.sh   # Dừng hệ thống
+```
+
+### Cách 3: Manual
+
+**Terminal 1 - Backend:**
 ```bash
 pip install -r requirements.txt
+python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 2. Chạy backend
-
-```bash
-python -m uvicorn backend.api.main:app --host 127.0.0.1 --port 8000 --reload --reload-dir backend
-```
-
-Backend mặc định chạy tại:
-
-```text
-http://127.0.0.1:8000
-```
-
-### 3. Cài dependency frontend
-
+**Terminal 2 - Frontend:**
 ```bash
 cd frontend
 npm install
-```
-
-### 4. Chạy frontend
-
-```bash
 npm run dev
 ```
 
-Frontend mặc định chạy tại:
+Xem chi tiết: **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)**
 
-```text
-http://localhost:5173
+---
+
+## 📁 Cấu Trúc Dự Án
+
+```
+DuAnTTCS/
+├── agent/                    # Sales Research Agent (LlamaIndex + ReAct)
+│   ├── sales_research_agent.py
+│   ├── tools.py
+│   └── prompts.py
+│
+├── verification/             # Verification Agent (LangGraph workflow)
+│   ├── agent/                # Verification logic
+│   ├── workflow/             # LangGraph routing, correction
+│   ├── models/               # Pydantic models
+│   ├── config/               # Configuration files
+│   └── utils/                # Utilities (logging, caching, etc.)
+│
+├── retriever/                # Hybrid Retriever (BM25 + Vector)
+│   ├── hybrid_retriever.py
+│   └── relevance_checker.py
+│
+├── backend/                  # FastAPI API Gateway
+│   ├── main.py               # API endpoints
+│   ├── stream_relay.py       # SSE streaming
+│   ├── database.py           # SQLite chat history
+│   └── workflow_factory.py   # Workflow initialization
+│
+├── frontend/                 # React + TypeScript UI
+│   ├── src/
+│   │   ├── components/
+│   │   ├── services/
+│   │   └── App.tsx
+│   └── package.json
+│
+├── tests/                    # Test suites (2601 tests)
+│   ├── test_unit.py
+│   ├── test_integration.py
+│   └── verification/
+│
+├── chroma_db/                # Vector store (ChromaDB)
+├── chat.db                   # Chat history (SQLite)
+├── .env                      # API keys and config
+├── requirements.txt          # Python dependencies
+│
+├── start.bat / start.sh      # Startup scripts
+├── stop.bat / stop.sh        # Stop scripts
+├── docker-compose.yml        # Docker configuration
+└── README.md                 # This file
 ```
 
-## Kiểm Tra API Nhanh
+---
 
-Health check:
+## 🎯 Kiến Trúc Hệ Thống
+
+```
+┌─────────────────┐
+│   User/Browser  │
+└────────┬────────┘
+         │ HTTP
+         ▼
+┌─────────────────────────────────────────────────────┐
+│            Frontend (React + TypeScript)             │
+│  • Real-time chat UI                                │
+│  • SSE streaming                                    │
+│  • Message history                                  │
+└──────────────────────┬──────────────────────────────┘
+                       │ SSE
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│          Backend (FastAPI API Gateway)               │
+│  • Auth (Bearer token)                              │
+│  • Chat threads management                          │
+│  • SSE streaming relay                              │
+│  • Health checks                                    │
+└──────────────────────┬──────────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────────┐
+│       Verification Workflow (LangGraph)              │
+│                                                      │
+│   ┌──────────────┐       ┌──────────────┐          │
+│   │   Research   │──────▶│ Verification │          │
+│   │     Node     │       │     Node     │          │
+│   └──────────────┘       └──────┬───────┘          │
+│          │                      │                   │
+│          │                      ▼                   │
+│          │              ┌───────────────┐           │
+│          │              │   Approved?   │           │
+│          │              └───────┬───────┘           │
+│          │                      │                   │
+│          │           ┌──────────┴──────────┐        │
+│          │           │                     │        │
+│          │           ▼                     ▼        │
+│          │    ┌──────────┐         ┌──────────┐    │
+│          └───▶│Correction│         │Escalation│    │
+│               │   Node   │         │   Node   │    │
+│               └──────────┘         └──────────┘    │
+│                                                      │
+└──────────────────────┬──────────────────────────────┘
+                       │
+         ┌─────────────┴─────────────┐
+         ▼                           ▼
+┌──────────────────┐      ┌──────────────────┐
+│ Research Agent   │      │ Vector Store     │
+│ (LlamaIndex)     │      │ (ChromaDB)       │
+│                  │      │                  │
+│ • Internal DB    │      │ • BM25 search    │
+│ • Tavily search  │      │ • Vector search  │
+│ • ReAct loop     │      │ • Hybrid ranking │
+└──────────────────┘      └──────────────────┘
+```
+
+---
+
+## ⚙️ Cấu Hình
+
+### File `.env`
+
+```env
+# API Keys
+LLAMA_CLOUD_API_KEY=llx-...
+GOOGLE_API_KEY=AQ.Ab8RN6JF...
+TAVILY_API_KEY=tvly-dev-...
+
+# API Gateway
+API_BEARER_TOKEN=dev-token-123
+FRONTEND_URL=http://localhost:5173
+
+# LLM Model
+LLM_MODEL=gemini-2.5-flash  # hoặc gemini-1.5-pro, gpt-4, etc.
+```
+
+### Thay đổi cấu hình nâng cao:
+
+- **Verification thresholds:** `verification/config/thresholds.yaml`
+- **Prompts:** `verification/config/prompts.yaml`
+- **Workflow config:** `verification/config/workflow_config.yaml`
+- **Logging:** `verification/config/logging_config.yaml`
+
+---
+
+## 🧪 Testing
 
 ```bash
-curl http://127.0.0.1:8000/health
+# Chạy toàn bộ test suite (2601 tests)
+pytest
+
+# Chạy với coverage
+pytest --cov=. --cov-report=html
+
+# Chạy tests cụ thể
+pytest tests/test_unit.py
+pytest tests/verification/
 ```
 
-Lấy danh sách sản phẩm:
+**Test results:** 2601 tests passed ✅
+
+---
+
+## 📊 Performance
+
+### Backend Startup Time:
+- **Before optimization:** ~60 giây
+- **After lazy loading:** ~0.1 giây (100ms) ✅
+- **First request:** ~60 giây (load AI workflow)
+- **Subsequent requests:** Instant ✅
+
+### Response Time:
+- **Simple queries:** 2-5 giây
+- **Complex queries (web search):** 5-10 giây
+- **With verification:** +2-3 giây
+
+---
+
+## 📚 Tài Liệu Bổ Sung
+
+- **[HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md)** - 🔥 Hướng dẫn chạy cho người mới (Docker)
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Hướng dẫn deploy chi tiết
+- **[DOCKER_QUICK_START.md](DOCKER_QUICK_START.md)** - Docker quick start
+- **[HOW_TO_RUN_DOCKER.md](HOW_TO_RUN_DOCKER.md)** - Docker detailed guide
+- **[PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md)** - Tối ưu hóa hiệu suất
+- **[API_QUOTA_SOLUTION.md](API_QUOTA_SOLUTION.md)** - Xử lý lỗi API quota
+- **[STARTUP_OPTIMIZATION_RESULTS.md](STARTUP_OPTIMIZATION_RESULTS.md)** - Kết quả tối ưu
+- **[HYBRID_RETRIEVER_EXPLAINED.md](HYBRID_RETRIEVER_EXPLAINED.md)** - Giải thích Hybrid Retriever
+- **[SALES_RESEARCH_AGENT_EXPLAINED.md](SALES_RESEARCH_AGENT_EXPLAINED.md)** - Giải thích Research Agent
+- **[VERIFICATION_AGENT_EXPLAINED.md](VERIFICATION_AGENT_EXPLAINED.md)** - Giải thích Verification Agent
+
+---
+
+## 🐛 Troubleshooting
+
+### Port đã được sử dụng:
+
+**Windows:**
+```bash
+netstat -ano | findstr :8000
+taskkill /F /PID <PID>
+```
+
+**Linux/Mac:**
+```bash
+lsof -ti:8000 | xargs kill -9
+```
+
+### API Quota exhausted:
+
+Thêm `OPENAI_API_KEY` vào `.env` để dùng OpenAI thay vì Gemini:
+```env
+OPENAI_API_KEY=sk-...
+LLM_MODEL=gpt-4
+```
+
+### Dependencies issues:
 
 ```bash
-curl "http://127.0.0.1:8000/api/products?limit=2"
+# Python
+pip install --upgrade -r requirements.txt
+
+# Node.js
+cd frontend && rm -rf node_modules && npm install
 ```
 
-Gửi câu hỏi chat:
+---
+
+## 🚢 Production Deployment
+
+### Với Docker Compose:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/api/chat \
-  -H "Content-Type: application/json" \
-  -d "{\"message\":\"Cho tôi laptop Dell dưới 20 triệu\",\"history\":[],\"conversation_state\":null}"
+# 1. Build images
+docker-compose build
+
+# 2. Start services
+docker-compose up -d
+
+# 3. Check status
+docker-compose ps
+
+# 4. View logs
+docker-compose logs -f
 ```
 
-Ví dụ câu hỏi nên thử trong giao diện:
+### Với Nginx Reverse Proxy:
 
-- `Laptop học tập dưới 20 triệu`
-- `Có laptop Dell nào màn hình 15 inch không?`
-- `Phân tích kỹ mẫu 00929021`
-- `Máy Lenovo IdeaPad Slim 3 14IPH11 U7 355 (83UQ003PVN) có hợp văn phòng không?`
-- `So sánh mẫu 00929021 với các máy cùng tầm giá`
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
 
-## Chạy Test
+    # Frontend
+    location / {
+        proxy_pass http://localhost:5173;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
 
-Chạy nhóm regression chính cho agent và API:
-
-```bash
-python -m pytest tests/test_api_contract_runtime.py tests/test_intent_router_v2.py tests/test_response_composer.py -q
+    # Backend API
+    location /api {
+        proxy_pass http://localhost:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # SSE support
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 300s;
+    }
+}
 ```
 
-Chạy nhóm kiểm tra product facts và tham chiếu sản phẩm:
+---
 
-```bash
-python -m pytest tests/test_product_facts.py tests/test_product_reference_resolution.py -q
-```
+## 🤝 Contributing
 
-Build frontend:
+1. Fork the project
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
+5. Open a Pull Request
 
-```bash
-cd frontend
-npm run build
-```
+---
 
-## Chạy Bằng Docker
+## 📝 License
 
-Nếu đã cấu hình Docker:
+This project is licensed under the MIT License.
 
-```bash
-docker compose up --build
-```
+---
 
-Dừng container:
+## 👥 Authors
 
-```bash
-docker compose down
-```
+- **Your Name** - Initial work
 
-## Các Module Backend Quan Trọng
+---
 
-- `backend/api/main.py`: API chính cho frontend, catalog và chat.
-- `backend/agent/intent_router.py`: nhận diện ý định người dùng.
-- `backend/agent/query_frame.py`: chuẩn hóa bộ lọc và ngữ cảnh truy vấn.
-- `backend/agent/product_resolver.py`: giải quyết SKU, tên sản phẩm, mẫu đang focus hoặc sản phẩm vừa nhắc.
-- `backend/agent/search_filters.py`: lọc sản phẩm theo constraints.
-- `backend/agent/response_composer.py`: tạo câu trả lời có cấu trúc.
-- `backend/agent/comparison.py`: tạo bảng so sánh sản phẩm.
-- `backend/agent/verifier.py`: kiểm chứng câu trả lời trước khi trả về.
-- `backend/agent/domain_contract.py`: các luật hợp đồng nghiệp vụ cho câu trả lời.
-- `backend/services/catalog.py`: đọc catalog, ảnh, giá và thông tin sản phẩm.
+## 🙏 Acknowledgments
 
-## Các Module Frontend Quan Trọng
+- LlamaIndex - RAG framework
+- LangGraph - Agent workflow orchestration
+- FastAPI - Modern web framework
+- React - Frontend library
+- ChromaDB - Vector database
 
-- `frontend/src/components/storefront/`: giao diện catalog và thẻ sản phẩm.
-- `frontend/src/components/copilot/`: drawer chat, bubble, bảng so sánh, thẻ sản phẩm inline.
-- `frontend/src/stores/copilotStore.ts`: trạng thái chat và gọi API.
-- `frontend/src/stores/commerceStore.ts`: trạng thái sản phẩm được chọn, giỏ hàng, so sánh.
-- `frontend/src/types/commerce.ts`: kiểu dữ liệu dùng chung phía client.
+---
 
-## Nguyên Tắc Trả Lời Của Advisor
+## 📞 Support
 
-Advisor chỉ nên kết luận dựa trên dữ liệu có trong catalog hoặc bằng suy luận an toàn từ thông số đã biết. Ví dụ:
+Nếu gặp vấn đề, vui lòng:
+1. Xem [Troubleshooting](#-troubleshooting)
+2. Đọc [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+3. Tạo GitHub Issue
+4. Liên hệ: your.email@example.com
 
-- Nếu hỏi giá, CPU, RAM, SSD, màn hình hoặc pin, câu trả lời phải dùng dữ liệu catalog.
-- Nếu catalog thiếu GPU, không được khẳng định chắc về gaming hoặc đồ họa nặng.
-- Nếu người dùng hỏi một mẫu cụ thể có hợp văn phòng không, Advisor phải đánh giá đúng mẫu đó, không chuyển sang tìm danh sách mẫu khác.
-- Nếu so sánh cùng tầm giá, câu trả lời phải giữ sản phẩm người dùng nhắc tới trong bảng so sánh.
-- Không kết luận về độ bền, pin tốt nhất hoặc sản phẩm tốt nhất nếu không có dữ liệu tương ứng.
+---
 
-## Ghi Chú Phát Triển
-
-- Repo có thể có nhiều file sinh ra khi chạy local như cache, log, database, build output. Không stage các file đó nếu không cần.
-- Khi sửa logic advisor, nên thêm regression test trong `tests/test_api_contract_runtime.py` hoặc các file test agent tương ứng.
-- Khi sửa giao diện chat, nên chạy `npm run build` trong thư mục `frontend`.
-- Khi sửa backend, nên chạy tối thiểu nhóm test API contract và response composer.
-
-## License
-
-Dự án phục vụ mục đích học tập, nghiên cứu và phát triển trợ lý tư vấn bán hàng dựa trên catalog.
+**Made with ❤️ by AI Sales Copilot Team**
