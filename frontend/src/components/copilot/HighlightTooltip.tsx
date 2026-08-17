@@ -1,53 +1,42 @@
-import { Sparkles } from "lucide-react";
-import { useTextSelection } from "@/hooks/useTextSelection";
-import { useCopilot } from "@/lib/copilot-store";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from 'framer-motion'
+import { Sparkles } from 'lucide-react'
+import { useTextSelection } from '@/hooks/useTextSelection'
+import { useCopilotStore } from '@/stores/copilotStore'
 
 export function HighlightTooltip() {
-  const selection = useTextSelection();
-  const { openWithPrefill } = useCopilot();
+  const selection = useTextSelection()
+  const openWithPrefill = useCopilotStore((state) => state.openWithPrefill)
 
-  const handleClick = () => {
-    if (!selection) return;
-    
-    const snippet = selection.text.length > 280
-      ? selection.text.slice(0, 280) + "…"
-      : selection.text;
-      
-    openWithPrefill(`Hãy giải thích cho tôi đoạn này: "${snippet}"`);
-    
-    // Clear selection
-    if (typeof window !== "undefined") {
-      window.getSelection()?.removeAllRanges();
-    }
-  };
+  const explainSelection = () => {
+    if (!selection) return
+    const excerpt =
+      selection.text.length > 500 ? `${selection.text.slice(0, 500)}…` : selection.text
+    openWithPrefill(`Hãy giải thích cho tôi đoạn này: "${excerpt}"`)
+    window.getSelection()?.removeAllRanges()
+  }
 
   return (
     <AnimatePresence>
       {selection && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.8, y: 10 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          className="pointer-events-none fixed z-[60]"
-          style={{
-            left: selection.x,
-            top: selection.y,
-            transform: "translate(-50%, calc(-100% - 8px))",
-          }}
+          data-selection-tooltip
+          className="fixed z-[70]"
+          style={{ left: selection.x, top: selection.y }}
+          initial={{ opacity: 0, y: 4, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 4, scale: 0.96 }}
+          transition={{ duration: 0.16, ease: 'easeOut' }}
         >
           <button
-            type="button"
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={handleClick}
-            className="pointer-events-auto inline-flex items-center gap-1.5 rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white shadow-lg transition-colors hover:bg-neutral-800 hover:shadow-xl backdrop-blur-sm border border-neutral-700/50"
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={explainSelection}
+            className="selection-button"
           >
-            <Sparkles className="h-3.5 w-3.5" />
+            <Sparkles size={14} />
             Giải thích đoạn này
           </button>
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  )
 }

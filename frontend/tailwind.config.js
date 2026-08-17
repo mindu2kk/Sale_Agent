@@ -7,61 +7,54 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['DM Sans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
       },
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+        background: '#F5F7FB',
+        surface: '#FFFFFF',
+        'surface-muted': '#F8FAFC',
+        'surface-card': '#FAFBFF',
+        primary: '#2563EB',
+        'primary-dark': '#1D4ED8',
+        'primary-light': '#EFF6FF',
+        text: {
+          primary: '#0F172A',
+          secondary: '#475569',
+          muted: '#94A3B8',
+          subtle: '#CBD5E1',
         },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+        border: {
+          DEFAULT: '#E2E8F0',
+          soft: '#EEF2F8',
+          strong: '#CBD5E1',
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
+        price: '#E11D48',
+        'price-dark': '#C4132E',
+        success: '#059669',
+        'spec-bg': '#F1F5F9',
+        'spec-text': '#475569',
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        card: '20px',
+        drawer: '24px',
+        xl: '12px',
+        '2xl': '16px',
+        '3xl': '20px',
+        '4xl': '24px',
       },
-      animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+      boxShadow: {
+        card: '0 2px 8px rgba(15, 23, 42, 0.05)',
+        'card-hover': '0 12px 32px rgba(15, 23, 42, 0.10)',
+        drawer: '-4px 0 32px rgba(15, 23, 42, 0.08)',
+        nav: '0 1px 0 #E2E8F0',
+        tray: '0 -8px 32px rgba(15, 23, 42, 0.10)',
+        'ai-btn': '0 6px 24px rgba(37, 99, 235, 0.18)',
+        modal: '0 24px 64px rgba(15, 23, 42, 0.18)',
       },
-      keyframes: {
-        "accordion-down": {
-          from: { height: "0" },
-          to: { height: "var(--radix-accordion-content-height)" },
-        },
-        "accordion-up": {
-          from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
+      fontSize: {
+        'price-lg': ['22px', { fontWeight: '700', lineHeight: '1.1' }],
+        'price-md': ['18px', { fontWeight: '700', lineHeight: '1.1' }],
+        'price-sm': ['15px', { fontWeight: '700', lineHeight: '1.1' }],
       },
     },
   },
