@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:match*",
+      "destination": "https://internship-eewx.onrender.com/api/:match*"
+    }
+  ]
+}
