@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for BatchProcessor - Multiple Verification Requests
 
 Covers:
@@ -17,7 +17,7 @@ import random
 
 import pytest
 
-from verification.utils.batch_processor import (
+from backend.verification.utils.batch_processor import (
     BatchMetrics,
     BatchProcessor,
     BatchResult,

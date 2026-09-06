@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for LazyWorkflowState and StateMemoryManager.
 
 Covers:
@@ -12,8 +12,8 @@ Covers:
 import time
 import pytest
 
-from verification.models.execution import ExecutionStep, ExecutionStatus
-from verification.utils.lazy_state import LazyWorkflowState, StateMemoryManager
+from backend.verification.models.execution import ExecutionStep, ExecutionStatus
+from backend.verification.utils.lazy_state import LazyWorkflowState, StateMemoryManager
 
 
 # ---------------------------------------------------------------------------

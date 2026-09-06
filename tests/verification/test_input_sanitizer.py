@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for InputSanitizer - Task 7.2.1
 
 Covers:
@@ -15,7 +15,7 @@ Covers:
 import asyncio
 import pytest
 
-from verification.utils.input_sanitizer import (
+from backend.verification.utils.input_sanitizer import (
     InputSanitizationError,
     InputSanitizer,
     SanitizationResult,

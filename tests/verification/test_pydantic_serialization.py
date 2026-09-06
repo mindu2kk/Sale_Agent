@@ -1,4 +1,4 @@
-"""
+﻿"""
 Task 4.1.4 - Pydantic State Serialization Compatibility Tests
 
 Verifies that all Pydantic models in the verification module support:
@@ -18,7 +18,7 @@ import json
 import pytest
 from datetime import datetime
 
-from verification.models.verification import (
+from backend.verification.models.verification import (
     VerificationResult,
     RubricCriteria,
     PriceIssue,
@@ -28,12 +28,12 @@ from verification.models.verification import (
     FailedCriterion,
     FeedbackReport,
 )
-from verification.models.execution import (
+from backend.verification.models.execution import (
     ExecutionStep,
     WorkflowMetrics,
     ExecutionStatus,
 )
-from verification.models.state import (
+from backend.verification.models.state import (
     WorkflowStateValidator,
     WorkflowConfig,
     create_initial_workflow_state,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Property-based tests for HybridRetriever, RelevanceChecker, and RAGPipeline.
 
 Uses Hypothesis. Each test runs at least 100 examples.
@@ -17,9 +17,9 @@ from hypothesis import strategies as st
 from llama_index.core.schema import NodeWithScore, TextNode
 from rank_bm25 import BM25Okapi
 
-from rag_pipeline import RAGPipeline, _DEFAULT_NO_MATCH_RESPONSE
-from retriever.hybrid_retriever import HybridRetriever
-from retriever.relevance_checker import RelevanceChecker
+from backend.retrieval.pipeline import RAGPipeline, _DEFAULT_NO_MATCH_RESPONSE
+from backend.retrieval.hybrid_retriever import HybridRetriever
+from backend.retrieval.relevance_checker import RelevanceChecker
 
 
 # ---------------------------------------------------------------------------
@@ -396,7 +396,7 @@ def test_union_pool_completeness(bm25_ids: list[str], vector_ids: list[str]) -> 
 # Sales Research Agent — Property-Based Tests (Task 7)
 # ===========================================================================
 
-from agent.sales_research_agent import SalesResearchAgent, AgentResult
+from backend.workflows.research_agent.sales_research_agent import SalesResearchAgent, AgentResult
 
 
 def make_mock_response(text: str, tool_names: list[str]):
@@ -420,7 +420,7 @@ def make_mock_response(text: str, tool_names: list[str]):
 # Feature: sales-research-agent, Property 1: Internal DB Priority
 @given(objection=st.text(min_size=1, max_size=200))
 @settings(max_examples=20)
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_pbt_internal_db_priority(mock_react_cls, objection):
     """Validates: Requirements 1.1
 
@@ -452,7 +452,7 @@ def test_pbt_internal_db_priority(mock_react_cls, objection):
 # Feature: sales-research-agent, Property 2: Max Iterations Bound
 @given(objection=st.text(min_size=1, max_size=200))
 @settings(max_examples=20)
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_pbt_max_iterations_bound(mock_react_cls, objection):
     """Validates: Requirements 1.2
 
@@ -481,7 +481,7 @@ def test_pbt_max_iterations_bound(mock_react_cls, objection):
 # Feature: sales-research-agent, Property 3: Draft Response Format
 @given(objection=st.text(min_size=1, max_size=200))
 @settings(max_examples=20)
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_pbt_draft_response_format(mock_react_cls, objection):
     """Validates: Requirements 2.1
 
@@ -510,7 +510,7 @@ def test_pbt_draft_response_format(mock_react_cls, objection):
 # Feature: sales-research-agent, Property 4: AgentResult Completeness
 @given(objection=st.text(min_size=0, max_size=500))
 @settings(max_examples=20)
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_pbt_agent_result_completeness(mock_react_cls, objection):
     """Validates: Requirements 1.3
 
@@ -544,7 +544,7 @@ def test_pbt_agent_result_completeness(mock_react_cls, objection):
 # Feature: sales-research-agent, Property 5: Conflict Resolution (Mocked)
 @given(objection=st.text(min_size=1, max_size=200))
 @settings(max_examples=10)
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_pbt_conflict_resolution(mock_react_cls, objection):
     """Validates: Requirements 2.2
 
@@ -574,8 +574,8 @@ def test_pbt_conflict_resolution(mock_react_cls, objection):
 
 import dataclasses
 import time as _time
-from agent.tools import build_internal_db_tool
-from agent.cache import QueryCache
+from backend.workflows.research_agent.tools import build_internal_db_tool
+from backend.workflows.research_agent.cache import QueryCache
 
 
 # ---------------------------------------------------------------------------
@@ -643,7 +643,7 @@ def test_pbt_cache_idempotence(query: str) -> None:
 # Feature: sales-research-agent, Property 8: Error Resilience
 @given(objection=st.text(min_size=1, max_size=200))
 @settings(max_examples=20)
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_pbt_error_resilience(mock_react_cls, objection: str) -> None:
     """Validates: Requirements 1.4
 
@@ -657,7 +657,7 @@ def test_pbt_error_resilience(mock_react_cls, objection: str) -> None:
     mock_agent_instance.chat.side_effect = RuntimeError("LLM failure")
     mock_react_cls.from_tools.return_value = mock_agent_instance
 
-    from agent.sales_research_agent import SalesResearchAgent, AgentResult
+    from backend.workflows.research_agent.sales_research_agent import SalesResearchAgent, AgentResult
     agent = SalesResearchAgent(llm=mock_llm, rag_pipeline=mock_pipeline)
     result = agent.run(objection)
 
@@ -672,7 +672,7 @@ def test_pbt_error_resilience(mock_react_cls, objection: str) -> None:
 # Feature: sales-research-agent, Property 9: Objection Preservation
 @given(objection=st.text(min_size=0, max_size=500))
 @settings(max_examples=30)
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_pbt_objection_preservation(mock_react_cls, objection: str) -> None:
     """Validates: Requirements 1.3
 
@@ -687,7 +687,7 @@ def test_pbt_objection_preservation(mock_react_cls, objection: str) -> None:
     )
     mock_react_cls.from_tools.return_value = mock_agent_instance
 
-    from agent.sales_research_agent import SalesResearchAgent
+    from backend.workflows.research_agent.sales_research_agent import SalesResearchAgent
     agent = SalesResearchAgent(llm=mock_llm, rag_pipeline=mock_pipeline)
     result = agent.run(objection)
 
@@ -701,7 +701,7 @@ def test_pbt_objection_preservation(mock_react_cls, objection: str) -> None:
 # Feature: sales-research-agent, Property 10: Early Termination
 @given(objection=st.text(min_size=1, max_size=200))
 @settings(max_examples=20)
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_pbt_early_termination(mock_react_cls, objection: str) -> None:
     """Validates: Requirements 10.1
 
@@ -719,7 +719,7 @@ def test_pbt_early_termination(mock_react_cls, objection: str) -> None:
     )
     mock_react_cls.from_tools.return_value = mock_agent_instance
 
-    from agent.sales_research_agent import SalesResearchAgent
+    from backend.workflows.research_agent.sales_research_agent import SalesResearchAgent
     agent = SalesResearchAgent(llm=mock_llm, rag_pipeline=mock_pipeline)
     result = agent.run(objection)
 

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for MetricsCollector - Binary Decision Tracking
 
 Covers:
@@ -11,8 +11,8 @@ Requirements: 7.1, 7.2, 7.3
 """
 
 import pytest
-from verification.utils.metrics_collector import MetricsCollector
-from verification.models.execution import WorkflowMetrics
+from backend.verification.utils.metrics_collector import MetricsCollector
+from backend.verification.models.execution import WorkflowMetrics
 
 
 # ---------------------------------------------------------------------------

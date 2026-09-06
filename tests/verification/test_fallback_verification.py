@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests for Fallback Verification Modes - Task 6.3.3
 
 Tests cover:
@@ -11,17 +11,17 @@ Tests cover:
 import pytest
 from unittest.mock import MagicMock, patch
 
-from verification.models.verification import (
+from backend.verification.models.verification import (
     IssueSeverity,
     VerificationResult,
     RubricCriteria,
 )
-from verification.utils.circuit_breaker import (
+from backend.verification.utils.circuit_breaker import (
     CircuitBreaker,
     CircuitState,
     reset_circuit_breaker_registry,
 )
-from verification.utils.fallback_verification import (
+from backend.verification.utils.fallback_verification import (
     FallbackConfig,
     FallbackMode,
     FallbackVerificationManager,
@@ -125,7 +125,7 @@ class TestRuleBasedPolicyCheck:
         assert issues[0].severity == IssueSeverity.MINOR
 
     def test_warning_issue_is_policy_issue(self):
-        from verification.models.verification import PolicyIssue
+        from backend.verification.models.verification import PolicyIssue
         passed, issues = _rule_based_policy_check(POLICY_DRAFT)
         assert isinstance(issues[0], PolicyIssue)
         assert issues[0].is_fabricated is False
@@ -262,7 +262,7 @@ class TestDatabaseOutageMode:
         assert result.criteria.price_accuracy_pass is False
 
     def test_uses_cached_policy_result_when_available(self):
-        from verification.models.verification import PolicyIssue
+        from backend.verification.models.verification import PolicyIssue
         cached_issue = PolicyIssue(
             mentioned_policy="bảo hành 2 năm",
             policy_type="warranty",

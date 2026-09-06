@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Task 7.1.1: BinaryVerificationConfig Pydantic schema.
 
 Covers:
@@ -18,7 +18,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch
 
-from verification.config.binary_verification_config import (
+from backend.verification.config.binary_verification_config import (
     BinaryVerificationConfig,
     EscalationThresholds,
     IssueSeverity,
@@ -29,7 +29,7 @@ from verification.config.binary_verification_config import (
     get_binary_verification_config,
     load_binary_verification_config,
 )
-from verification.config.thresholds_config import VerificationThresholdsConfig
+from backend.verification.config.thresholds_config import VerificationThresholdsConfig
 
 
 # ---------------------------------------------------------------------------

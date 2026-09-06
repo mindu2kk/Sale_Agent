@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for ExecutionLogExporter (Task 6.1.5)
 
 Covers:
@@ -20,13 +20,13 @@ from typing import List, Optional
 
 import pytest
 
-from verification.models.execution import (
+from backend.verification.models.execution import (
     ExecutionStatus,
     ExecutionStep,
     WorkflowExecutionLog,
     WorkflowMetrics,
 )
-from verification.utils.execution_log_exporter import (
+from backend.verification.utils.execution_log_exporter import (
     ExecutionLogExporter,
     ExportFilter,
     _serialize_step,

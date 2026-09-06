@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for task 4.1.2 and 4.1.5:
   - AgentResult binary verification workflow state integration
   - Backward compatibility for existing functionality
@@ -11,7 +11,7 @@ Tests verify:
 - retry_count and correction_feedback fields work correctly
 - AgentResult can be used within LangGraph WorkflowState context
 - Legacy code that only uses core fields continues to work unchanged
-- WorkflowStatus is importable from agent.sales_research_agent
+- WorkflowStatus is importable from backend.workflows.research_agent.sales_research_agent
 - SalesResearchAgent.run() signature is backward compatible
 """
 
@@ -23,7 +23,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from agent.sales_research_agent import AgentResult, WorkflowStatus
+from backend.workflows.research_agent.sales_research_agent import AgentResult, WorkflowStatus
 
 
 # ---------------------------------------------------------------------------
@@ -199,16 +199,16 @@ class TestPublicAPIBackwardCompatibility:
     """Verify that the public API surface of agent.sales_research_agent is stable."""
 
     def test_workflow_status_importable(self):
-        """WorkflowStatus must be importable from agent.sales_research_agent."""
-        from agent.sales_research_agent import WorkflowStatus  # noqa: F401
+        """WorkflowStatus must be importable from backend.workflows.research_agent.sales_research_agent."""
+        from backend.workflows.research_agent.sales_research_agent import WorkflowStatus  # noqa: F401
 
     def test_agent_result_importable(self):
-        """AgentResult must be importable from agent.sales_research_agent."""
-        from agent.sales_research_agent import AgentResult  # noqa: F401
+        """AgentResult must be importable from backend.workflows.research_agent.sales_research_agent."""
+        from backend.workflows.research_agent.sales_research_agent import AgentResult  # noqa: F401
 
     def test_sales_research_agent_importable(self):
-        """SalesResearchAgent must be importable from agent.sales_research_agent."""
-        from agent.sales_research_agent import SalesResearchAgent  # noqa: F401
+        """SalesResearchAgent must be importable from backend.workflows.research_agent.sales_research_agent."""
+        from backend.workflows.research_agent.sales_research_agent import SalesResearchAgent  # noqa: F401
 
     def test_agent_result_is_dataclass(self):
         """AgentResult must remain a dataclass (not converted to Pydantic or plain class)."""
@@ -256,13 +256,13 @@ class TestSalesResearchAgentRunSignatureCompatibility:
 
     def _make_agent(self):
         from unittest.mock import MagicMock, patch
-        from agent.sales_research_agent import SalesResearchAgent
+        from backend.workflows.research_agent.sales_research_agent import SalesResearchAgent
 
         llm = MagicMock()
         rag_pipeline = MagicMock()
-        with patch("agent.sales_research_agent.build_internal_db_tool", return_value=MagicMock()), \
-             patch("agent.sales_research_agent.build_tavily_tool", return_value=None), \
-             patch("agent.sales_research_agent.ReActAgent") as mock_react:
+        with patch("backend.workflows.research_agent.sales_research_agent.build_internal_db_tool", return_value=MagicMock()), \
+             patch("backend.workflows.research_agent.sales_research_agent.build_tavily_tool", return_value=None), \
+             patch("backend.workflows.research_agent.sales_research_agent.ReActAgent") as mock_react:
             mock_react.from_tools.return_value = MagicMock()
             agent = SalesResearchAgent(llm=llm, rag_pipeline=rag_pipeline)
         return agent

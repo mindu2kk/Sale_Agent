@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Task 5.3.2: Throughput monitoring for concurrent binary workflows.
 
 Covers:
@@ -17,7 +17,7 @@ import asyncio
 import time
 import pytest
 
-from verification.utils.performance import ThroughputMonitor, ThroughputSnapshot
+from backend.verification.utils.performance import ThroughputMonitor, ThroughputSnapshot
 
 
 # ---------------------------------------------------------------------------

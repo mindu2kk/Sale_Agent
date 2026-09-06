@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for CircuitBreaker - Task 6.2.2
 
 Covers:
@@ -20,7 +20,7 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from verification.utils.circuit_breaker import (
+from backend.verification.utils.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerRegistry,
     CircuitOpenError,
@@ -28,7 +28,7 @@ from verification.utils.circuit_breaker import (
     get_circuit_breaker_registry,
     reset_circuit_breaker_registry,
 )
-from verification.utils.error_rate_tracker import ErrorRateTracker
+from backend.verification.utils.error_rate_tracker import ErrorRateTracker
 
 
 # ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-"""
+﻿"""
 End-to-end integration tests for task 4.1.3.
 
 Tests the complete verification workflow using realistic mocked Sales Research
@@ -30,11 +30,11 @@ from unittest.mock import MagicMock, patch, call
 
 import pytest
 
-from agent.sales_research_agent import AgentResult, SalesResearchAgent
-from verification.agent.verification_agent import VerificationAgent
-from verification.config.config import VerificationConfig
-from verification.models.state import WorkflowState
-from verification.models.verification import (
+from backend.workflows.research_agent.sales_research_agent import AgentResult, SalesResearchAgent
+from backend.verification.agent.verification_agent import VerificationAgent
+from backend.verification.config.config import VerificationConfig
+from backend.verification.models.state import WorkflowState
+from backend.verification.models.verification import (
     IssueSeverity,
     PolicyIssue,
     PriceIssue,
@@ -42,9 +42,9 @@ from verification.models.verification import (
     RelevanceIssue,
     VerificationResult,
 )
-from verification.workflow.correction import SelfCorrectionNode
-from verification.workflow.routing import WorkflowRouter
-from verification.workflow.workflow import VerificationWorkflow
+from backend.verification.workflow.correction import SelfCorrectionNode
+from backend.verification.workflow.routing import WorkflowRouter
+from backend.verification.workflow.workflow import VerificationWorkflow
 
 
 # ---------------------------------------------------------------------------

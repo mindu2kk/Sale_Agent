@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for RateLimiter - Task 7.2.5
 
 Covers:
@@ -19,7 +19,7 @@ import time
 
 import pytest
 
-from verification.utils.rate_limiter import (
+from backend.verification.utils.rate_limiter import (
     RateLimitConfig,
     RateLimitExceededError,
     RateLimitMiddleware,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests: Early Termination Manager
 
 Tests for configurable early termination rules during parallel verification.
@@ -7,13 +7,13 @@ Supports Task 1.3.2: Implement configurable early termination rules cho critical
 """
 
 import pytest
-from verification.config.thresholds_config import (
+from backend.verification.config.thresholds_config import (
     EscalationThresholds,
     IssueSeverity,
     VerificationThresholdsConfig,
     get_default_thresholds_config,
 )
-from verification.utils.early_termination import (
+from backend.verification.utils.early_termination import (
     EarlyTerminationManager,
     TerminationResult,
     create_early_termination_manager,
@@ -245,12 +245,12 @@ class TestTerminationResult:
 # Task 5.4.1: CriticalIssueDetector tests
 # ---------------------------------------------------------------------------
 
-from verification.utils.early_termination import (
+from backend.verification.utils.early_termination import (
     CriticalIssueDetector,
     TerminationDecision,
     should_terminate_immediately,
 )
-from verification.models.verification import (
+from backend.verification.models.verification import (
     VerificationResult,
     RubricCriteria,
     PriceIssue,
@@ -535,8 +535,8 @@ class TestRoutingWithCriticalIssueDetector:
         }
 
     def _make_router(self):
-        from verification.workflow.routing import WorkflowRouter
-        from verification.config.config import VerificationConfig
+        from backend.verification.workflow.routing import WorkflowRouter
+        from backend.verification.config.config import VerificationConfig
         config = VerificationConfig()
         return WorkflowRouter(config)
 

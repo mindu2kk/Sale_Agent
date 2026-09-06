@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for AccessController - Task 7.2.3
 
 Covers:
@@ -16,7 +16,7 @@ Covers:
 
 import pytest
 
-from verification.utils.access_control import (
+from backend.verification.utils.access_control import (
     AccessControlError,
     AccessController,
     RolePermissions,

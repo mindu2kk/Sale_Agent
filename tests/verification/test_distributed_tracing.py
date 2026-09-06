@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for distributed_tracing module (Task 6.1.4)
 
 Validates: Requirements 7.1 (execution history), 7.3 (structured JSON log), 9.3 (parallel checks)
@@ -7,7 +7,7 @@ Validates: Requirements 7.1 (execution history), 7.3 (structured JSON log), 9.3 
 import asyncio
 import pytest
 
-from verification.utils.distributed_tracing import (
+from backend.verification.utils.distributed_tracing import (
     DistributedTracer,
     Span,
     get_tracer,

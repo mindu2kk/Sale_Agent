@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for structured feedback generation (Task 2.4.4)
 
 Covers:
@@ -11,7 +11,7 @@ Covers:
 
 import pytest
 from unittest.mock import MagicMock
-from verification.models.verification import (
+from backend.verification.models.verification import (
     VerificationResult,
     RubricCriteria,
     PriceIssue,
@@ -21,9 +21,9 @@ from verification.models.verification import (
     FeedbackReport,
     FailedCriterion,
 )
-from verification.agent.verification_agent import VerificationAgent
-from verification.workflow.correction import SelfCorrectionNode
-from verification.config import VerificationConfig
+from backend.verification.agent.verification_agent import VerificationAgent
+from backend.verification.workflow.correction import SelfCorrectionNode
+from backend.verification.config import VerificationConfig
 
 
 # ---------------------------------------------------------------------------

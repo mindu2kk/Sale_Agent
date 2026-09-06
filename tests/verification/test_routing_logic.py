@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for WorkflowRouter routing logic (Task 3.2.5)
 
 Tests cover:
@@ -16,8 +16,8 @@ import pytest
 from unittest.mock import MagicMock
 from datetime import datetime
 
-from verification.workflow.routing import WorkflowRouter
-from verification.models.verification import (
+from backend.verification.workflow.routing import WorkflowRouter
+from backend.verification.models.verification import (
     VerificationResult,
     RubricCriteria,
     PriceIssue,
@@ -25,7 +25,7 @@ from verification.models.verification import (
     RelevanceIssue,
     IssueSeverity,
 )
-from verification.config import VerificationConfig
+from backend.verification.config import VerificationConfig
 
 
 # ---------------------------------------------------------------------------

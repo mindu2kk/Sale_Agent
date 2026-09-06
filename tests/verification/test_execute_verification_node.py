@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for execute_verification_node() - Task 3.1.2
 
 Covers:
@@ -15,9 +15,9 @@ import pytest
 from datetime import datetime
 from unittest.mock import MagicMock, AsyncMock, patch
 
-from verification.workflow.workflow import VerificationWorkflow
-from verification.config.config import VerificationConfig
-from verification.models.verification import (
+from backend.verification.workflow.workflow import VerificationWorkflow
+from backend.verification.config.config import VerificationConfig
+from backend.verification.models.verification import (
     VerificationResult,
     RubricCriteria,
     PriceIssue,
@@ -25,7 +25,7 @@ from verification.models.verification import (
     RelevanceIssue,
     IssueSeverity,
 )
-from verification.models.execution import ExecutionStatus
+from backend.verification.models.execution import ExecutionStatus
 
 
 # ---------------------------------------------------------------------------

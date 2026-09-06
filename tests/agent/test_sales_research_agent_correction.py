@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for task 4.1.1: SalesResearchAgent structured issue feedback support.
 
 Tests verify:
@@ -14,8 +14,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from agent.prompts import build_correction_context
-from agent.sales_research_agent import AgentResult, SalesResearchAgent
+from backend.workflows.research_agent.prompts import build_correction_context
+from backend.workflows.research_agent.sales_research_agent import AgentResult, SalesResearchAgent
 
 
 # ---------------------------------------------------------------------------
@@ -27,9 +27,9 @@ def _make_agent() -> SalesResearchAgent:
     llm = MagicMock()
     rag_pipeline = MagicMock()
 
-    with patch("agent.sales_research_agent.build_internal_db_tool", return_value=MagicMock()), \
-         patch("agent.sales_research_agent.build_tavily_tool", return_value=None), \
-         patch("agent.sales_research_agent.ReActAgent") as mock_react:
+    with patch("backend.workflows.research_agent.sales_research_agent.build_internal_db_tool", return_value=MagicMock()), \
+         patch("backend.workflows.research_agent.sales_research_agent.build_tavily_tool", return_value=None), \
+         patch("backend.workflows.research_agent.sales_research_agent.ReActAgent") as mock_react:
         mock_react.from_tools.return_value = MagicMock()
         agent = SalesResearchAgent(llm=llm, rag_pipeline=rag_pipeline)
 
@@ -132,9 +132,10 @@ class TestRunBackwardCompatibility:
         assert isinstance(result, AgentResult)
         assert result.objection_text == "iPhone quá đắt"
         assert result.draft_response == "Dạ, bản nháp."
-        # The raw objection should be passed directly (no correction prefix)
+        # The grounded prompt must preserve the original objection.
         call_args = agent._agent.chat.call_args[0][0]
-        assert call_args == "iPhone quá đắt"
+        assert "iPhone quá đắt" in call_args
+        assert "DỮ LIỆU NỘI BỘ" in call_args
 
     def test_run_returns_agent_result_on_exception(self):
         agent = _make_agent()
@@ -143,8 +144,8 @@ class TestRunBackwardCompatibility:
         result = agent.run("Some objection")
 
         assert isinstance(result, AgentResult)
-        assert "sự cố kỹ thuật" in result.draft_response
-        assert result.tools_used == []
+        assert "chưa tìm thấy dữ liệu nội bộ" in result.draft_response
+        assert result.tools_used == ["internal_db_search"]
 
 
 # ---------------------------------------------------------------------------
@@ -199,7 +200,8 @@ class TestRunWithCorrectionFeedback:
         result = agent.run("objection", correction_feedback=None)
 
         call_args = agent._agent.chat.call_args[0][0]
-        assert call_args == "objection"
+        assert "objection" in call_args
+        assert "DỮ LIỆU NỘI BỘ" in call_args
 
     def test_objection_text_preserved_in_result(self):
         agent = _make_agent()

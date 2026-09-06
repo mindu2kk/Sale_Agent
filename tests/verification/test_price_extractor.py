@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests for PriceExtractor
 
 Tests Requirements 4.1: Price extraction from draft_response using regex/NLP
@@ -13,7 +13,7 @@ Covers:
 """
 
 import pytest
-from verification.utils.price_extractor import (
+from backend.verification.utils.price_extractor import (
     PriceExtractor,
     ExtractedPrice,
     extract_prices_detailed,

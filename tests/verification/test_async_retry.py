@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for AsyncRetryStrategy and async_retry decorator - Task 6.2.5
 
 Tests:
@@ -19,15 +19,15 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from verification.utils.async_retry import (
+from backend.verification.utils.async_retry import (
     AsyncRetryStrategy,
     RetryConfig,
     RetryResult,
     async_retry,
     create_llm_retry_strategy,
 )
-from verification.utils.circuit_breaker import CircuitBreaker, CircuitOpenError
-from verification.utils.error_classifier import ErrorCategory
+from backend.verification.utils.circuit_breaker import CircuitBreaker, CircuitOpenError
+from backend.verification.utils.error_classifier import ErrorCategory
 
 
 # ---------------------------------------------------------------------------

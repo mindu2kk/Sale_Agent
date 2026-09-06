@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for PromptTemplateCache (task 5.1.3) and CachedPromptTemplates.
 
 Covers:
@@ -21,12 +21,12 @@ from unittest.mock import patch
 
 import pytest
 
-from verification.utils.prompt_cache import (
+from backend.verification.utils.prompt_cache import (
     PromptTemplateCache,
     configure_prompt_template_cache,
     get_prompt_template_cache,
 )
-from verification.config.prompt_templates import (
+from backend.verification.config.prompt_templates import (
     CachedPromptTemplates,
     PromptTemplateError,
     get_cached_prompt_manager,

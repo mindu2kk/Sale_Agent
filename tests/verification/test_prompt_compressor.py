@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for verification/utils/prompt_compressor.py
 
 Covers:
@@ -9,7 +9,7 @@ Covers:
 """
 
 import pytest
-from verification.utils.prompt_compressor import (
+from backend.verification.utils.prompt_compressor import (
     PromptCompressor,
     CompressionResult,
     count_tokens,
@@ -362,17 +362,17 @@ class TestGetPromptCompressor:
 
 class TestCachedPromptTemplatesCompression:
     def test_compression_level_none_by_default(self):
-        from verification.config.prompt_templates import CachedPromptTemplates
+        from backend.verification.config.prompt_templates import CachedPromptTemplates
         cpt = CachedPromptTemplates()
         assert cpt.compressor.level == "none"
 
     def test_compression_level_light(self):
-        from verification.config.prompt_templates import CachedPromptTemplates
+        from backend.verification.config.prompt_templates import CachedPromptTemplates
         cpt = CachedPromptTemplates(compression_level="light")
         assert cpt.compressor.level == "light"
 
     def test_render_returns_string(self):
-        from verification.config.prompt_templates import CachedPromptTemplates
+        from backend.verification.config.prompt_templates import CachedPromptTemplates
         cpt = CachedPromptTemplates(compression_level="light")
         rendered = cpt.render(
             "price_accuracy_check",
@@ -386,7 +386,7 @@ class TestCachedPromptTemplatesCompression:
         assert len(rendered) > 0
 
     def test_last_compression_result_available(self):
-        from verification.config.prompt_templates import CachedPromptTemplates
+        from backend.verification.config.prompt_templates import CachedPromptTemplates
         cpt = CachedPromptTemplates(compression_level="light")
         cpt.render(
             "price_accuracy_check",
@@ -401,7 +401,7 @@ class TestCachedPromptTemplatesCompression:
         assert isinstance(result, CompressionResult)
 
     def test_compressor_property_accessible(self):
-        from verification.config.prompt_templates import CachedPromptTemplates
+        from backend.verification.config.prompt_templates import CachedPromptTemplates
         cpt = CachedPromptTemplates(compression_level="aggressive")
         assert isinstance(cpt.compressor, PromptCompressor)
         assert cpt.compressor.level == "aggressive"

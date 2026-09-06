@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Task 7.1.4: Configuration versioning with rollback capabilities.
 
 Covers:
@@ -21,7 +21,7 @@ from typing import List
 
 import pytest
 
-from verification.config.binary_verification_config import (
+from backend.verification.config.binary_verification_config import (
     BinaryVerificationConfig,
     ConfigVersion,
     ConfigVersionManager,

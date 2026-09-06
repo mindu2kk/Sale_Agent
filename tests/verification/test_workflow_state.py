@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests cho WorkflowState Pydantic Model
 
 Tests validation rules, computed properties, và utility functions
@@ -9,14 +9,14 @@ import pytest
 from datetime import datetime, timedelta
 from typing import Dict, Any
 
-from verification.models.state import (
+from backend.verification.models.state import (
     WorkflowStateValidator,
     WorkflowConfig,
     create_initial_workflow_state,
     validate_workflow_state
 )
-from verification.models.verification import VerificationResult, RubricCriteria
-from verification.models.execution import ExecutionStep, ExecutionStatus
+from backend.verification.models.verification import VerificationResult, RubricCriteria
+from backend.verification.models.execution import ExecutionStep, ExecutionStatus
 
 
 class TestWorkflowStateValidator:

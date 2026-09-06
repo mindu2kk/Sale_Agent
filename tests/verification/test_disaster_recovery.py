@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for DisasterRecoveryManager - Task 6.3.5
 
 Tests cover:
@@ -18,7 +18,7 @@ from unittest.mock import patch
 
 import pytest
 
-from verification.utils.disaster_recovery import DisasterRecoveryManager
+from backend.verification.utils.disaster_recovery import DisasterRecoveryManager
 
 
 # ---------------------------------------------------------------------------
@@ -245,7 +245,7 @@ class TestLoadSnapshotWithFallback:
 
     def test_fallback_state_is_valid_workflow_state(self, manager):
         """The fallback initial state must pass WorkflowStateValidator."""
-        from verification.models.state import WorkflowStateValidator
+        from backend.verification.models.state import WorkflowStateValidator
 
         result = manager.load_snapshot_with_fallback(
             "wf_fallback_valid", fallback_objection_text="Valid objection text here"
@@ -330,7 +330,7 @@ class TestCleanupOldSnapshots:
         """Write a snapshot file with a saved_at timestamp `days_old` days ago."""
         saved_at = (datetime.now() - timedelta(days=days_old)).isoformat()
         state = _minimal_state(workflow_id)
-        from verification.models.state import WorkflowStateValidator
+        from backend.verification.models.state import WorkflowStateValidator
         validator = WorkflowStateValidator(**state)
         snapshot = {
             "saved_at": saved_at,

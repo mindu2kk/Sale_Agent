@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for ResourceUsageMonitor - Task 5.3.3 / 5.2.5
 
 Covers:
@@ -19,7 +19,7 @@ import time
 import pytest
 from unittest.mock import patch, MagicMock, call
 
-from verification.utils.resource_monitor import (
+from backend.verification.utils.resource_monitor import (
     CleanupAction,
     ResourceThresholds,
     ResourceSnapshot,
@@ -211,7 +211,7 @@ class TestTakeSnapshot:
 
     def test_snapshot_without_psutil(self):
         """Should return zeros for memory/cpu but still track tasks/threads."""
-        with patch("verification.utils.resource_monitor._PSUTIL_AVAILABLE", False):
+        with patch("backend.verification.utils.resource_monitor._PSUTIL_AVAILABLE", False):
             snap = _take_snapshot()
         assert snap.memory_rss_mb == 0.0
         assert snap.cpu_percent == 0.0

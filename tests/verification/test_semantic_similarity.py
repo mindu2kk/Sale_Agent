@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for SemanticSimilarityAnalyzer and TopicRelevanceChecker
 
 Covers:
@@ -12,16 +12,16 @@ Covers:
 import pytest
 from unittest.mock import MagicMock
 
-from verification.utils.semantic_similarity import (
+from backend.verification.utils.semantic_similarity import (
     SemanticSimilarityAnalyzer,
     SimilarityResult,
     INTENT_KEYWORDS,
     EMPATHY_PHRASES,
 )
-from verification.agent.checkers import TopicRelevanceChecker
-from verification.models.verification import RelevanceIssue, IssueSeverity
-from verification.config.config import VerificationConfig
-from verification.config.thresholds_config import TopicRelevanceThresholds
+from backend.verification.agent.checkers import TopicRelevanceChecker
+from backend.verification.models.verification import RelevanceIssue, IssueSeverity
+from backend.verification.config.config import VerificationConfig
+from backend.verification.config.thresholds_config import TopicRelevanceThresholds
 
 
 # ---------------------------------------------------------------------------

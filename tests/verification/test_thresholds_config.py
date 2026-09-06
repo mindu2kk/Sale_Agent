@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests: Verification Thresholds Configuration
 
 Tests for the verification thresholds configuration system supporting
@@ -9,7 +9,7 @@ Supports Task 1.3.1: Design verification thresholds config cho critical/major/mi
 
 import pytest
 from unittest.mock import patch, mock_open
-from verification.config.thresholds_config import (
+from backend.verification.config.thresholds_config import (
     VerificationThresholdsConfig,
     PriceAccuracyThresholds,
     PolicyAuthenticityThresholds,

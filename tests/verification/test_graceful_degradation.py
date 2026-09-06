@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for GracefulDegradationHandler - Task 6.3.1
 
 Tests:
@@ -19,7 +19,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from verification.models.verification import (
+from backend.verification.models.verification import (
     IssueSeverity,
     PolicyIssue,
     PriceIssue,
@@ -27,7 +27,7 @@ from verification.models.verification import (
     RubricCriteria,
     VerificationResult,
 )
-from verification.utils.graceful_degradation import (
+from backend.verification.utils.graceful_degradation import (
     GracefulDegradationHandler,
     MAX_DEGRADABLE_FAILURES,
     PartialVerificationResult,
@@ -132,7 +132,7 @@ class TestRunCheckerSafely:
         def checker_fn():
             raise TimeoutError("LLM timeout")
 
-        with caplog.at_level(logging.WARNING, logger="verification.utils.graceful_degradation"):
+        with caplog.at_level(logging.WARNING, logger="backend.verification.utils.graceful_degradation"):
             await handler.run_checker_safely("relevance", checker_fn)
 
         assert any("graceful degradation" in r.message.lower() for r in caplog.records)
@@ -312,8 +312,8 @@ class TestVerifyDraftWithDegradation:
 
     def _make_agent(self):
         """Build a minimal VerificationAgent with mocked checkers."""
-        from verification.agent.verification_agent import VerificationAgent
-        from verification.config import VerificationConfig
+        from backend.verification.agent.verification_agent import VerificationAgent
+        from backend.verification.config import VerificationConfig
 
         config = VerificationConfig()
         agent = VerificationAgent.__new__(VerificationAgent)

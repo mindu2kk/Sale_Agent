@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for async cache warming strategies (Task 5.1.4).
 
 Covers:
@@ -17,11 +17,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from verification.utils.cache import (
+from backend.verification.utils.cache import (
     PolicyDocumentCache,
     ProductPriceLookupCache,
 )
-from verification.utils.cache_warmer import (
+from backend.verification.utils.cache_warmer import (
     AllCachesWarmingResult,
     WarmingResult,
     _POLICY_WARM_QUERIES,
@@ -32,8 +32,8 @@ from verification.utils.cache_warmer import (
     warm_product_price_cache,
     warm_prompt_cache,
 )
-from verification.utils.product_matcher import ProductMatch, ProductMatcher
-from verification.utils.prompt_cache import PromptTemplateCache
+from backend.verification.utils.product_matcher import ProductMatch, ProductMatcher
+from backend.verification.utils.prompt_cache import PromptTemplateCache
 
 
 # ---------------------------------------------------------------------------

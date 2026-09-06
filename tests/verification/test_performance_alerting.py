@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Task 5.3.5: Performance alerting thresholds with early termination benefits.
 
 Covers:
@@ -20,10 +20,10 @@ import time
 import pytest
 from unittest.mock import MagicMock
 
-from verification.utils.performance import AsyncStepLatencyTracker, StepLatencyRecord, ThroughputMonitor
-from verification.utils.resource_monitor import ResourceUsageReport
-from verification.utils.token_tracker import LLMTokenTracker
-from verification.utils.performance_alerting import (
+from backend.verification.utils.performance import AsyncStepLatencyTracker, StepLatencyRecord, ThroughputMonitor
+from backend.verification.utils.resource_monitor import ResourceUsageReport
+from backend.verification.utils.token_tracker import LLMTokenTracker
+from backend.verification.utils.performance_alerting import (
     AlertSeverity,
     AlertType,
     PerformanceAlert,

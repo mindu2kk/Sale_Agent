@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Task 7.1.3: Environment-specific config overrides with validation.
 
 Covers:
@@ -21,13 +21,13 @@ from unittest.mock import patch
 
 import pytest
 
-from verification.config.binary_verification_config import (
+from backend.verification.config.binary_verification_config import (
     BinaryVerificationConfig,
     RuntimeConfigManager,
     apply_environment_override_to_config,
     get_binary_verification_config,
 )
-from verification.config.environment_config_override import (
+from backend.verification.config.environment_config_override import (
     SUPPORTED_ENVIRONMENTS,
     EnvironmentConfigOverride,
     EnvironmentOverrideError,
@@ -40,7 +40,7 @@ from verification.config.environment_config_override import (
     detect_environment,
     get_environment_override,
 )
-from verification.config.thresholds_config import IssueSeverity
+from backend.verification.config.thresholds_config import IssueSeverity
 
 
 # ---------------------------------------------------------------------------

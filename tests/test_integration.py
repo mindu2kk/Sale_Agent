@@ -1,4 +1,4 @@
-"""
+﻿"""
 Integration & performance tests for HybridRetriever, RelevanceChecker, and RAGPipeline.
 
 Task 8.1 — End-to-end: real query → RelevanceChecker → HybridRetriever → valid metadata
@@ -106,7 +106,7 @@ RELEVANCE_CHECKER_LATENCY_LIMIT_S = 5.0
 @pytest.fixture(scope="module")
 def hybrid_retriever():
     """Real HybridRetriever backed by on-disk docstore and ChromaDB."""
-    from retriever.hybrid_retriever import HybridRetriever
+    from backend.retrieval.hybrid_retriever import HybridRetriever
     return HybridRetriever(
         docstore_path=DOCSTORE_PATH,
         chroma_path=CHROMA_PATH,
@@ -117,7 +117,7 @@ def hybrid_retriever():
 @pytest.fixture(scope="module")
 def relevance_checker():
     """Real RelevanceChecker using Gemini 2.0 Flash Lite."""
-    from retriever.relevance_checker import RelevanceChecker
+    from backend.retrieval.relevance_checker import RelevanceChecker
     llm = _GeminiLLM(model_name="gemini-2.0-flash-lite")
     return RelevanceChecker(llm=llm)
 
@@ -125,7 +125,7 @@ def relevance_checker():
 @pytest.fixture(scope="module")
 def rag_pipeline(hybrid_retriever, relevance_checker):
     """Real RAGPipeline wiring together the real retriever and checker."""
-    from rag_pipeline import RAGPipeline
+    from backend.retrieval.pipeline import RAGPipeline
     return RAGPipeline(retriever=hybrid_retriever, checker=relevance_checker)
 
 
@@ -150,7 +150,7 @@ class TestEndToEnd:
     def test_product_query_returns_nodes_with_valid_metadata(self, rag_pipeline):
         """Task 8.1: Product queries return NodeWithScore list with valid metadata."""
         from llama_index.core.schema import NodeWithScore
-        from rag_pipeline import _DEFAULT_NO_MATCH_RESPONSE
+        from backend.retrieval.pipeline import _DEFAULT_NO_MATCH_RESPONSE
 
         for query in self.PRODUCT_QUERIES:
             result = rag_pipeline.query(query)
@@ -177,7 +177,7 @@ class TestEndToEnd:
     @requires_gemini
     def test_no_match_query_returns_default_response(self, rag_pipeline):
         """Task 8.1: Off-topic queries return the default NO_MATCH response string."""
-        from rag_pipeline import _DEFAULT_NO_MATCH_RESPONSE
+        from backend.retrieval.pipeline import _DEFAULT_NO_MATCH_RESPONSE
 
         for query in self.NO_MATCH_QUERIES:
             result = rag_pipeline.query(query)
@@ -306,7 +306,7 @@ class TestRelevanceCheckerPerformance:
 
 import dataclasses
 from unittest.mock import MagicMock, patch
-from agent.sales_research_agent import SalesResearchAgent, AgentResult
+from backend.workflows.research_agent.sales_research_agent import SalesResearchAgent, AgentResult
 
 
 def make_mock_response(text: str, tool_names: list[str]):
@@ -323,8 +323,8 @@ def make_mock_response(text: str, tool_names: list[str]):
     return response
 
 
-@patch("agent.sales_research_agent.ReActAgent")
-@patch("agent.sales_research_agent.build_tavily_tool", return_value=None)
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.build_tavily_tool", return_value=None)
 def test_e2e_dell_inspiron_objection(mock_tavily, mock_react_cls):
     """End-to-end: objection about Dell Inspiron → draft_response has product info from DB."""
     mock_llm = MagicMock()
@@ -348,8 +348,8 @@ def test_e2e_dell_inspiron_objection(mock_tavily, mock_react_cls):
     assert "internal_db_search" in result.tools_used
 
 
-@patch("agent.sales_research_agent.ReActAgent")
-@patch("agent.sales_research_agent.build_tavily_tool", return_value=None)
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.build_tavily_tool", return_value=None)
 def test_performance_no_tavily(mock_tavily, mock_react_cls):
     """Performance: run() completes in ≤ 5s when not using Tavily (Requirement 6.1)."""
     mock_llm = MagicMock()
@@ -372,8 +372,8 @@ def test_performance_no_tavily(mock_tavily, mock_react_cls):
     assert isinstance(result, AgentResult)
 
 
-@patch("agent.sales_research_agent.ReActAgent")
-@patch("agent.sales_research_agent.build_tavily_tool", return_value=None)
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.build_tavily_tool", return_value=None)
 def test_performance_with_tavily(mock_tavily, mock_react_cls):
     """Performance: run() completes in ≤ 10s when using Tavily (Requirement 6.2)."""
     mock_llm = MagicMock()
@@ -396,8 +396,8 @@ def test_performance_with_tavily(mock_tavily, mock_react_cls):
     assert isinstance(result, AgentResult)
 
 
-@patch("agent.sales_research_agent.ReActAgent")
-@patch("agent.sales_research_agent.build_tavily_tool", return_value=None)
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.build_tavily_tool", return_value=None)
 def test_state_graph_readiness(mock_tavily, mock_react_cls):
     """StateGraph readiness: AgentResult can be converted to dict via dataclasses.asdict()."""
     mock_llm = MagicMock()

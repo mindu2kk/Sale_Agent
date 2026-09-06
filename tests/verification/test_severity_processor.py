@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for SeverityBasedProcessor
 
 Covers:
@@ -10,20 +10,20 @@ Covers:
 """
 
 import pytest
-from verification.models.verification import (
+from backend.verification.models.verification import (
     IssueSeverity,
     PriceIssue,
     PolicyIssue,
     RelevanceIssue,
 )
-from verification.utils.severity_processor import (
+from backend.verification.utils.severity_processor import (
     SeverityBasedProcessor,
     SeverityLevel,
     IssuePriority,
     DEFAULT_CHECKER_ORDER,
 )
-from verification.utils.early_termination import EarlyTerminationManager
-from verification.config.thresholds_config import (
+from backend.verification.utils.early_termination import EarlyTerminationManager
+from backend.verification.config.thresholds_config import (
     EscalationThresholds,
     VerificationThresholdsConfig,
     get_default_thresholds_config,

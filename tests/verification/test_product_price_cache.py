@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for ProductPriceLookupCache (task 5.1.2)
 
 Covers:
@@ -14,7 +14,7 @@ import time
 import pytest
 from unittest.mock import MagicMock, patch, PropertyMock
 
-from verification.utils.cache import (
+from backend.verification.utils.cache import (
     ProductPriceLookupCache,
     get_product_price_cache,
     configure_product_price_cache,
@@ -187,8 +187,8 @@ class TestPriceAccuracyCheckerCacheIntegration:
 
     def _make_checker(self, price_cache):
         """Build a PriceAccuracyChecker with a mocked ProductMatcher."""
-        from verification.agent.checkers import PriceAccuracyChecker
-        from verification.config import VerificationConfig
+        from backend.verification.agent.checkers import PriceAccuracyChecker
+        from backend.verification.config import VerificationConfig
 
         config = VerificationConfig()
         checker = PriceAccuracyChecker(

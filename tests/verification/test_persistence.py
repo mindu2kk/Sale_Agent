@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for WorkflowPersistenceManager
 
 Tests cover:
@@ -20,7 +20,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from verification.workflow.persistence import WorkflowPersistenceManager
+from backend.verification.workflow.persistence import WorkflowPersistenceManager
 
 
 # ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for DashboardDataCollector and related dashboard models.
 
 Covers:
@@ -15,8 +15,8 @@ from typing import Any, Dict
 
 import pytest
 
-from verification.models.execution import WorkflowMetrics
-from verification.models.verification import (
+from backend.verification.models.execution import WorkflowMetrics
+from backend.verification.models.verification import (
     IssueSeverity,
     PolicyIssue,
     PriceIssue,
@@ -24,7 +24,7 @@ from verification.models.verification import (
     RubricCriteria,
     VerificationResult,
 )
-from verification.utils.dashboard import (
+from backend.verification.utils.dashboard import (
     DashboardDataCollector,
     DashboardSnapshot,
     IssueBreakdown,

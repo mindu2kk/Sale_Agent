@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for BackupManager
 
 Tests cover:
@@ -21,7 +21,7 @@ from unittest.mock import patch
 
 import pytest
 
-from verification.utils.backup_manager import BackupManager, DEFAULT_BACKUP_DIR, DEFAULT_MAX_BACKUPS
+from backend.verification.utils.backup_manager import BackupManager, DEFAULT_BACKUP_DIR, DEFAULT_MAX_BACKUPS
 
 
 # ---------------------------------------------------------------------------

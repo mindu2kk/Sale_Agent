@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for ShutdownManager - Task 7.3.3
 
 Covers:
@@ -21,7 +21,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from verification.utils.graceful_shutdown import (
+from backend.verification.utils.graceful_shutdown import (
     ShutdownManager,
     get_shutdown_manager,
     lifespan_with_shutdown,
@@ -363,8 +363,8 @@ class TestApiShutdownBehavior:
         return 503 for regular endpoints (not /health/live).
         """
         from httpx import AsyncClient, ASGITransport
-        from verification.api import app
-        from verification.utils.graceful_shutdown import reset_shutdown_manager, get_shutdown_manager
+        from backend.verification.api import app
+        from backend.verification.utils.graceful_shutdown import reset_shutdown_manager, get_shutdown_manager
 
         reset_shutdown_manager()
         manager = get_shutdown_manager()
@@ -388,8 +388,8 @@ class TestApiShutdownBehavior:
         the process manager knows the process is still alive.
         """
         from httpx import AsyncClient, ASGITransport
-        from verification.api import app
-        from verification.utils.graceful_shutdown import reset_shutdown_manager, get_shutdown_manager
+        from backend.verification.api import app
+        from backend.verification.utils.graceful_shutdown import reset_shutdown_manager, get_shutdown_manager
 
         reset_shutdown_manager()
         manager = get_shutdown_manager()

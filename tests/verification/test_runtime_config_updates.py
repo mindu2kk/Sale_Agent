@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Task 7.1.2: Runtime configuration updates for issue severity levels.
 
 Covers:
@@ -18,14 +18,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from verification.config.binary_verification_config import (
+from backend.verification.config.binary_verification_config import (
     BinaryVerificationConfig,
     ConfigObserver,
     RuntimeConfigManager,
     get_binary_verification_config,
     get_runtime_config_manager,
 )
-from verification.config.thresholds_config import IssueSeverity
+from backend.verification.config.thresholds_config import IssueSeverity
 
 
 # ---------------------------------------------------------------------------

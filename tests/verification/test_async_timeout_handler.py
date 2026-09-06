@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for AsyncTimeoutHandler - Task 6.3.2
 
 Covers:
@@ -17,8 +17,8 @@ from unittest.mock import patch
 
 import pytest
 
-from verification.config.thresholds_config import TimeoutConfig
-from verification.utils.async_timeout_handler import (
+from backend.verification.config.thresholds_config import TimeoutConfig
+from backend.verification.utils.async_timeout_handler import (
     AsyncTimeoutHandler,
     OperationTimeoutError,
     get_async_timeout_handler,
@@ -307,7 +307,7 @@ class TestPerOperationTimeouts:
 class TestConfigLoadingFromYAML:
     def test_loads_timeout_config_from_yaml(self):
         """TimeoutConfig values should be loaded from thresholds.yaml."""
-        from verification.config.thresholds_config import enhanced_load_thresholds_config
+        from backend.verification.config.thresholds_config import enhanced_load_thresholds_config
         import os
 
         yaml_path = os.path.join(

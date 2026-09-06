@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for ErrorClassifier - Task 6.2.3
 
 Covers:
@@ -12,7 +12,7 @@ Covers:
 import pytest
 from datetime import datetime
 
-from verification.utils.error_classifier import (
+from backend.verification.utils.error_classifier import (
     ErrorCategory,
     ClassifiedError,
     ErrorClassifier,
@@ -20,7 +20,7 @@ from verification.utils.error_classifier import (
     CATEGORY_ACTION_MAP,
     get_error_classifier,
 )
-from verification.models.verification import (
+from backend.verification.models.verification import (
     PriceIssue,
     PolicyIssue,
     RelevanceIssue,
@@ -167,7 +167,7 @@ class TestRetriable:
         severity = classifier.get_severity_for_category(ErrorCategory.API_RATE_LIMIT)
         assert severity == "major"
         # Verify retriability via direct category check
-        from verification.utils.error_classifier import _RETRIABLE_CATEGORIES
+        from backend.verification.utils.error_classifier import _RETRIABLE_CATEGORIES
         assert ErrorCategory.API_RATE_LIMIT in _RETRIABLE_CATEGORIES
 
 

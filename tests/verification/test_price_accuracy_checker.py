@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests for PriceAccuracyChecker — Binary Price Verification
 
 Tests Requirements 4.3: Binary scoring — PASS if deviation ≤ 1%, FAIL otherwise
@@ -19,12 +19,12 @@ import pytest
 from unittest.mock import MagicMock, patch
 from typing import List, Optional
 
-from verification.agent.checkers import PriceAccuracyChecker
-from verification.config.config import VerificationConfig
-from verification.config.thresholds_config import PriceAccuracyThresholds
-from verification.models.verification import PriceIssue, IssueSeverity
-from verification.utils.product_matcher import ProductMatch
-from verification.utils.cache import ProductPriceLookupCache
+from backend.verification.agent.checkers import PriceAccuracyChecker
+from backend.verification.config.config import VerificationConfig
+from backend.verification.config.thresholds_config import PriceAccuracyThresholds
+from backend.verification.models.verification import PriceIssue, IssueSeverity
+from backend.verification.utils.product_matcher import ProductMatch
+from backend.verification.utils.cache import ProductPriceLookupCache
 
 
 # ---------------------------------------------------------------------------
@@ -55,7 +55,7 @@ def _make_checker(
     )
     # Replace the real ProductMatcher with a mock or in-memory one
     if catalog_source is not None:
-        from verification.utils.product_matcher import ProductMatcher
+        from backend.verification.utils.product_matcher import ProductMatcher
         checker._product_matcher = ProductMatcher(catalog_source=catalog_source)
     else:
         checker._product_matcher = None
@@ -639,7 +639,7 @@ class TestEarlyTermination:
         product_prices: Optional[dict] = None,
     ) -> PriceAccuracyChecker:
         """Build a checker with specific early termination settings."""
-        from verification.config.thresholds_config import (
+        from backend.verification.config.thresholds_config import (
             VerificationThresholdsConfig,
             EscalationThresholds,
         )
@@ -688,7 +688,7 @@ class TestEarlyTermination:
 
             checker._find_product_from_context = mock_find_product_from_context
         else:
-            from verification.utils.product_matcher import ProductMatcher
+            from backend.verification.utils.product_matcher import ProductMatcher
             checker._product_matcher = ProductMatcher(catalog_source=SAMPLE_CATALOG)
         return checker
 
@@ -736,7 +736,7 @@ class TestEarlyTermination:
 
     def test_early_termination_returns_issues_found_so_far(self):
         """Early termination returns all issues found before stopping, not just the first."""
-        from verification.config.thresholds_config import (
+        from backend.verification.config.thresholds_config import (
             VerificationThresholdsConfig,
             EscalationThresholds,
         )
@@ -802,7 +802,7 @@ class TestEarlyTermination:
 
     def test_thresholds_config_parameter_accepted(self):
         """PriceAccuracyChecker accepts thresholds_config parameter without error."""
-        from verification.config.thresholds_config import VerificationThresholdsConfig
+        from backend.verification.config.thresholds_config import VerificationThresholdsConfig
         config = VerificationConfig(price_tolerance_percent=1.0, price_critical_threshold=30.0)
         thresholds_config = VerificationThresholdsConfig()
         checker = PriceAccuracyChecker(

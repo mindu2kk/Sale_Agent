@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for CacheInvalidationManager (Task 5.1.5)
 
 Validates:
@@ -13,7 +13,7 @@ from __future__ import annotations
 import pytest
 from unittest.mock import MagicMock, patch
 
-from verification.utils.cache_invalidation import (
+from backend.verification.utils.cache_invalidation import (
     CacheAdapter,
     CacheInvalidationManager,
     ConfigChangeEvent,

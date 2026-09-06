@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for AuditLogger - Task 7.2.4
 
 Covers:
@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pytest
 
-from verification.utils.audit_logger import (
+from backend.verification.utils.audit_logger import (
     AuditEventType,
     AuditLogEntry,
     AuditLogger,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for CriticalAlertManager - Task 6.2.4
 
 Covers:
@@ -21,7 +21,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from verification.models.verification import (
+from backend.verification.models.verification import (
     IssueSeverity,
     PolicyIssue,
     PriceIssue,
@@ -29,14 +29,14 @@ from verification.models.verification import (
     RubricCriteria,
     VerificationResult,
 )
-from verification.utils.critical_alert_manager import (
+from backend.verification.utils.critical_alert_manager import (
     AlertSeverity,
     CriticalAlert,
     CriticalAlertManager,
     get_critical_alert_manager,
     reset_critical_alert_manager,
 )
-from verification.utils.error_rate_tracker import ErrorRateTracker
+from backend.verification.utils.error_rate_tracker import ErrorRateTracker
 
 
 # ---------------------------------------------------------------------------

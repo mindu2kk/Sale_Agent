@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for PromptTemplateManager (task 1.3.3).
 
 Tests cover:
@@ -16,7 +16,7 @@ Tests cover:
 import pytest
 from pathlib import Path
 
-from verification.config.prompt_templates import (
+from backend.verification.config.prompt_templates import (
     PromptTemplateManager,
     PromptTemplateError,
 )

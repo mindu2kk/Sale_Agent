@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for FastAPI Health Check Endpoints - Task 7.3.2
 
 Tests for verification/api.py covering:
@@ -11,17 +11,17 @@ Tests for verification/api.py covering:
 import pytest
 from fastapi.testclient import TestClient
 
-from verification.api import app
-from verification.utils.health_check import (
+from backend.verification.api import app
+from backend.verification.utils.health_check import (
     reset_health_checker,
     HealthStatus,
 )
-from verification.utils.circuit_breaker import (
+from backend.verification.utils.circuit_breaker import (
     reset_circuit_breaker_registry,
     get_circuit_breaker_registry,
 )
-from verification.utils.error_rate_tracker import reset_error_rate_tracker
-from verification.utils.graceful_shutdown import reset_shutdown_manager
+from backend.verification.utils.error_rate_tracker import reset_error_rate_tracker
+from backend.verification.utils.graceful_shutdown import reset_shutdown_manager
 
 
 # ---------------------------------------------------------------------------

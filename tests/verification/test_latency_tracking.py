@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Task 5.3.1: Latency tracking for each async verification step.
 
 Covers:
@@ -16,14 +16,14 @@ import pytest
 from datetime import datetime
 from unittest.mock import MagicMock, AsyncMock
 
-from verification.utils.performance import AsyncStepLatencyTracker, StepLatencyRecord
-from verification.agent.verification_agent import VerificationAgent
-from verification.workflow.workflow import VerificationWorkflow
-from verification.config.config import VerificationConfig
-from verification.models.verification import (
+from backend.verification.utils.performance import AsyncStepLatencyTracker, StepLatencyRecord
+from backend.verification.agent.verification_agent import VerificationAgent
+from backend.verification.workflow.workflow import VerificationWorkflow
+from backend.verification.config.config import VerificationConfig
+from backend.verification.models.verification import (
     VerificationResult, RubricCriteria,
 )
-from verification.models.execution import ExecutionStatus
+from backend.verification.models.execution import ExecutionStatus
 
 
 # ---------------------------------------------------------------------------

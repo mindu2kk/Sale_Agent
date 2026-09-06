@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for HybridRetriever, RelevanceChecker, and RAGPipeline.
 
 All external services (ChromaDB, LLM, embedding models) are mocked.
@@ -14,9 +14,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from llama_index.core.schema import NodeWithScore, TextNode
 
-from retriever.hybrid_retriever import HybridRetriever
-from retriever.relevance_checker import RelevanceChecker
-from rag_pipeline import RAGPipeline, _DEFAULT_NO_MATCH_RESPONSE
+from backend.retrieval.hybrid_retriever import HybridRetriever
+from backend.retrieval.relevance_checker import RelevanceChecker
+from backend.retrieval.pipeline import RAGPipeline, _DEFAULT_NO_MATCH_RESPONSE
 
 
 # ---------------------------------------------------------------------------
@@ -330,7 +330,7 @@ class TestEmptyCorpus:
 # Task 6 — SalesResearchAgent unit tests
 # ---------------------------------------------------------------------------
 
-from agent.sales_research_agent import SalesResearchAgent, AgentResult
+from backend.workflows.research_agent.sales_research_agent import SalesResearchAgent, AgentResult
 
 
 def make_mock_response(text: str, tool_names: list[str]):
@@ -347,21 +347,21 @@ def make_mock_response(text: str, tool_names: list[str]):
     return response
 
 
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_agent_raises_on_none_llm(mock_react):
     mock_pipeline = MagicMock()
     with pytest.raises(ValueError):
         SalesResearchAgent(llm=None, rag_pipeline=mock_pipeline)
 
 
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_agent_raises_on_none_pipeline(mock_react):
     mock_llm = MagicMock()
     with pytest.raises(ValueError):
         SalesResearchAgent(llm=mock_llm, rag_pipeline=None)
 
 
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_internal_db_called_first(mock_react_cls):
     mock_llm = MagicMock()
     mock_pipeline = MagicMock()
@@ -379,7 +379,7 @@ def test_internal_db_called_first(mock_react_cls):
     assert result.tools_used[0] == "internal_db_search"
 
 
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_tavily_not_called_when_db_sufficient(mock_react_cls):
     mock_llm = MagicMock()
     mock_pipeline = MagicMock()
@@ -401,7 +401,7 @@ def test_tavily_not_called_when_db_sufficient(mock_react_cls):
 # Task 7 — test_early_termination_when_db_sufficient
 # ---------------------------------------------------------------------------
 
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_early_termination_when_db_sufficient(mock_react_cls):
     """Task 7: When Internal_DB_Tool returns valid JSON data (not NO_MATCH),
     tavily_web_search must NOT appear in AgentResult.tools_used."""
@@ -430,7 +430,7 @@ def test_early_termination_when_db_sufficient(mock_react_cls):
     assert "tavily_web_search" not in result.tools_used
 
 
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_draft_starts_with_da_or_vang(mock_react_cls):
     mock_llm = MagicMock()
     mock_pipeline = MagicMock()
@@ -448,7 +448,7 @@ def test_draft_starts_with_da_or_vang(mock_react_cls):
     assert result.draft_response.startswith("Dạ,") or result.draft_response.startswith("Vâng,")
 
 
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_no_info_fallback_message(mock_react_cls):
     mock_llm = MagicMock()
     mock_pipeline = MagicMock()
@@ -466,7 +466,7 @@ def test_no_info_fallback_message(mock_react_cls):
     assert "chưa có đủ thông tin" in result.draft_response
 
 
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_agent_result_has_all_fields(mock_react_cls):
     mock_llm = MagicMock()
     mock_pipeline = MagicMock()
@@ -486,8 +486,8 @@ def test_agent_result_has_all_fields(mock_react_cls):
     assert result.tools_used is not None
 
 
-@patch("agent.sales_research_agent.build_tavily_tool")
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.build_tavily_tool")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_tavily_absent_when_no_api_key(mock_react_cls, mock_build_tavily):
     mock_build_tavily.return_value = None
     mock_llm = MagicMock()
@@ -503,7 +503,7 @@ def test_tavily_absent_when_no_api_key(mock_react_cls, mock_build_tavily):
     assert mock_build_tavily.return_value is None
 
 
-@patch("agent.sales_research_agent.ReActAgent")
+@patch("backend.workflows.research_agent.sales_research_agent.ReActAgent")
 def test_max_iterations_respected(mock_react_cls):
     mock_llm = MagicMock()
     mock_pipeline = MagicMock()
@@ -525,7 +525,7 @@ def test_max_iterations_respected(mock_react_cls):
 # Task 8.10 — test_tool_exception_returns_safe_json
 # ---------------------------------------------------------------------------
 
-from agent.tools import build_internal_db_tool
+from backend.workflows.research_agent.tools import build_internal_db_tool
 
 
 def test_tool_exception_returns_safe_json():
@@ -595,7 +595,7 @@ def test_internal_db_truncates_at_500_chars():
 
 def test_tavily_truncates_at_500_chars():
     """9.2: Tavily content of 1000 chars → truncated to 500 in output."""
-    from agent.tools import build_tavily_tool
+    from backend.workflows.research_agent.tools import build_tavily_tool
 
     long_content = "y" * 1000
     mock_client = MagicMock()
@@ -646,7 +646,7 @@ def test_internal_db_exception_returns_error_json():
 # ---------------------------------------------------------------------------
 
 import time as _time
-from agent.cache import QueryCache
+from backend.workflows.research_agent.cache import QueryCache
 
 
 def test_cache_hit_returns_same_result():

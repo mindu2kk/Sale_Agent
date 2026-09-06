@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for ErrorRateTracker - Task 6.2.1
 
 Covers:
@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 import pytest
 
-from verification.utils.error_rate_tracker import (
+from backend.verification.utils.error_rate_tracker import (
     ErrorRateTracker,
     WORKFLOW_COMPONENTS,
     get_error_rate_tracker,

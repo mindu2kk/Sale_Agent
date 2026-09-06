@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Self-Correction Loop Mechanism (Task 3.4.5)
 
 Covers:
@@ -16,11 +16,11 @@ import pytest
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-from verification.workflow.correction import SelfCorrectionNode
-from verification.workflow.routing import WorkflowRouter
-from verification.workflow.workflow import VerificationWorkflow
-from verification.config.config import VerificationConfig
-from verification.models.verification import (
+from backend.verification.workflow.correction import SelfCorrectionNode
+from backend.verification.workflow.routing import WorkflowRouter
+from backend.verification.workflow.workflow import VerificationWorkflow
+from backend.verification.config.config import VerificationConfig
+from backend.verification.models.verification import (
     VerificationResult,
     RubricCriteria,
     PriceIssue,
@@ -28,7 +28,7 @@ from verification.models.verification import (
     RelevanceIssue,
     IssueSeverity,
 )
-from verification.models.execution import ExecutionStatus
+from backend.verification.models.execution import ExecutionStatus
 
 
 # ---------------------------------------------------------------------------

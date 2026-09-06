@@ -1,4 +1,4 @@
-"""
+﻿"""
 Test suite for VerificationResult Pydantic model với binary pass/fail status
 
 Tests cover:
@@ -10,7 +10,7 @@ Tests cover:
 
 import pytest
 from datetime import datetime
-from verification.models.verification import (
+from backend.verification.models.verification import (
     VerificationResult,
     RubricCriteria,
     PriceIssue,

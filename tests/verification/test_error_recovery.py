@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for ErrorRecoveryManager - Task 6.2.5
 
 Tests:
@@ -20,14 +20,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from verification.utils.error_recovery import (
+from backend.verification.utils.error_recovery import (
     ErrorRecoveryManager,
     RecoveryErrorType,
     RecoveryResult,
     get_error_recovery_manager,
     reset_error_recovery_manager,
 )
-from verification.utils.circuit_breaker import CircuitBreaker, reset_circuit_breaker_registry
+from backend.verification.utils.circuit_breaker import CircuitBreaker, reset_circuit_breaker_registry
 
 
 # ---------------------------------------------------------------------------

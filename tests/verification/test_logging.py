@@ -1,4 +1,4 @@
-"""
+﻿"""
 Test Suite for Enhanced Structured Logging với Correlation IDs
 
 Comprehensive tests for:
@@ -22,7 +22,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
-from verification.utils.logging import (
+from backend.verification.utils.logging import (
     CorrelationIDGenerator,
     StructuredFormatter,
     EnhancedVerificationLogger,
@@ -40,14 +40,14 @@ from verification.utils.logging import (
     get_workflow_status,
     cleanup_completed_workflows
 )
-from verification.utils.logging_setup import (
+from backend.verification.utils.logging_setup import (
     LoggingConfigurator,
     setup_verification_logging,
     get_workflow_logger,
     get_verification_logger,
     configure_logging_for_testing
 )
-from verification.config import VerificationConfig, LogLevel
+from backend.verification.config import VerificationConfig, LogLevel
 
 
 class TestCorrelationIDGenerator:
@@ -488,7 +488,7 @@ class TestLoggingConfiguration:
         logger = get_verification_logger("agent")
         
         assert isinstance(logger, EnhancedVerificationLogger)
-        assert "verification.agent" in logger.name
+        assert "backend.verification.agent" in logger.name
 
 
 class TestPerformanceTracking:
@@ -548,7 +548,7 @@ class TestWorkflowStatusTracking:
         update_workflow_status(old_workflow_id, "completed")
         
         # Mock old timestamp
-        with patch('verification.utils.logging.datetime') as mock_datetime:
+        with patch('backend.verification.utils.logging.datetime') as mock_datetime:
             # Make workflow appear old
             old_time = datetime.now(timezone.utc) - timedelta(hours=25)
             mock_datetime.now.return_value = old_time

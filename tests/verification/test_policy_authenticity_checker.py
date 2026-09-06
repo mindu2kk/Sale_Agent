@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests for PolicyAuthenticityChecker — Policy Verification Against Official Documents
 
 Tests Task 2.2.2: Policy verification against official documents with exact matching.
@@ -22,10 +22,10 @@ import pytest
 from unittest.mock import MagicMock, patch
 from typing import List, Optional, Dict, Any
 
-from verification.agent.checkers import PolicyAuthenticityChecker
-from verification.config.config import VerificationConfig
-from verification.models.verification import PolicyIssue, IssueSeverity
-from verification.utils.cache import PolicyDocumentCache
+from backend.verification.agent.checkers import PolicyAuthenticityChecker
+from backend.verification.config.config import VerificationConfig
+from backend.verification.models.verification import PolicyIssue, IssueSeverity
+from backend.verification.utils.cache import PolicyDocumentCache
 
 
 # ---------------------------------------------------------------------------
@@ -977,7 +977,7 @@ class TestEarlyTermination:
     def test_early_termination_stops_after_critical_issue(self):
         """With early termination enabled and stop_on_first_critical=True,
         processing stops after first CRITICAL issue."""
-        from verification.config.thresholds_config import (
+        from backend.verification.config.thresholds_config import (
             VerificationThresholdsConfig,
             EscalationThresholds,
         )
@@ -1007,7 +1007,7 @@ class TestEarlyTermination:
 
     def test_no_early_termination_processes_all_statements(self):
         """With early termination disabled, all statements are processed."""
-        from verification.config.thresholds_config import (
+        from backend.verification.config.thresholds_config import (
             VerificationThresholdsConfig,
             EscalationThresholds,
         )

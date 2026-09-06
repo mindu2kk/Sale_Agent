@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Task 7.1.5: Configuration validation tools with Pydantic models.
 
 Covers:
@@ -12,15 +12,15 @@ from __future__ import annotations
 
 import pytest
 
-from verification.config.binary_verification_config import BinaryVerificationConfig
-from verification.config.config_validation_tools import (
+from backend.verification.config.binary_verification_config import BinaryVerificationConfig
+from backend.verification.config.config_validation_tools import (
     ConfigValidationReport,
     ConfigValidator,
     validate_config,
     validate_config_dict,
     validate_yaml_file,
 )
-from verification.config.thresholds_config import (
+from backend.verification.config.thresholds_config import (
     EscalationThresholds,
     PriceAccuracyThresholds,
     TopicRelevanceThresholds,

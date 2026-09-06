@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests: AdaptiveTimeoutManager
 
 Tests for adaptive timeout mechanisms based on issue complexity.
@@ -9,13 +9,13 @@ Supports Task 5.4.4: Build adaptive timeout mechanisms based on issue complexity
 import asyncio
 import pytest
 
-from verification.models.verification import (
+from backend.verification.models.verification import (
     IssueSeverity,
     PriceIssue,
     PolicyIssue,
     RelevanceIssue,
 )
-from verification.utils.adaptive_timeout import (
+from backend.verification.utils.adaptive_timeout import (
     AdaptiveTimeoutManager,
     ComplexityScore,
     TimeoutConfig,

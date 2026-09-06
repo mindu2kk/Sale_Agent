@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for ApiKeyManager - Task 7.2.2
 
 Covers:
@@ -22,7 +22,7 @@ import asyncio
 import os
 import pytest
 
-from verification.utils.api_key_manager import (
+from backend.verification.utils.api_key_manager import (
     ApiKeyError,
     ApiKeyManager,
     KeySelectionStrategy,

@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for parallel verification with first-failure-fast logic — Task 5.4.2
 
 Covers:
@@ -18,9 +18,9 @@ import pytest
 from unittest.mock import MagicMock, AsyncMock, patch, call
 from typing import List, Tuple
 
-from verification.agent.verification_agent import VerificationAgent
-from verification.config.config import VerificationConfig
-from verification.models.verification import (
+from backend.verification.agent.verification_agent import VerificationAgent
+from backend.verification.config.config import VerificationConfig
+from backend.verification.models.verification import (
     VerificationResult,
     RubricCriteria,
     PriceIssue,
@@ -426,7 +426,7 @@ class TestEarlyTerminationIntegration:
         The has_critical_issues and immediate_termination flags on VerificationResult
         are set by should_terminate_immediately() from early_termination.py.
         """
-        from verification.utils.early_termination import should_terminate_immediately
+        from backend.verification.utils.early_termination import should_terminate_immediately
 
         agent = _make_agent()
         state = _make_state()
@@ -450,7 +450,7 @@ class TestEarlyTerminationIntegration:
     @pytest.mark.asyncio
     async def test_no_critical_issues_flags_are_false(self):
         """When no critical issues, both flags remain False."""
-        from verification.utils.early_termination import should_terminate_immediately
+        from backend.verification.utils.early_termination import should_terminate_immediately
 
         agent = _make_agent()
         state = _make_state()

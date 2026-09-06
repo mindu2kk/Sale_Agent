@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for Task 1.3.4: Configuration loader với Pydantic validation và environment overrides.
 
 Covers:
@@ -15,7 +15,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch
 
-from verification.config import (
+from backend.verification.config import (
     VerificationConfig,
     LogLevel,
     get_config,
@@ -26,7 +26,7 @@ from verification.config import (
     ConfigurationError,
     get_config_loader,
 )
-from verification.config.config import _global_config
+from backend.verification.config.config import _global_config
 
 
 # ---------------------------------------------------------------------------
@@ -38,7 +38,7 @@ CONFIG_DIR = Path(__file__).parent.parent / "config"
 
 def _reset_singleton():
     """Reset the global config singleton between tests."""
-    import verification.config.config as cfg_module
+    import backend.verification.config.config as cfg_module
     cfg_module._global_config = None
 
 
@@ -188,26 +188,26 @@ class TestEnvironmentVariableOverrides:
     def test_verification_max_retries_env_var(self):
         _reset_singleton()
         with patch.dict(os.environ, {"VERIFICATION_MAX_RETRIES": "6"}):
-            from verification.config.config import _get_env_overrides
+            from backend.verification.config.config import _get_env_overrides
             overrides = _get_env_overrides()
         assert overrides.get("max_retries") == 6
 
     def test_verification_log_level_env_var(self):
         with patch.dict(os.environ, {"VERIFICATION_LOG_LEVEL": "DEBUG"}):
-            from verification.config.config import _get_env_overrides
+            from backend.verification.config.config import _get_env_overrides
             overrides = _get_env_overrides()
         assert overrides.get("log_level") == "DEBUG"
 
     def test_verification_parallel_bool_env_var(self):
         with patch.dict(os.environ, {"VERIFICATION_PARALLEL_VERIFICATION": "false"}):
-            from verification.config.config import _get_env_overrides
+            from backend.verification.config.config import _get_env_overrides
             overrides = _get_env_overrides()
         assert overrides.get("parallel_verification") is False
 
     def test_invalid_env_var_is_ignored(self):
         """Invalid type conversion should not crash; field is simply omitted."""
         with patch.dict(os.environ, {"VERIFICATION_MAX_RETRIES": "not_a_number"}):
-            from verification.config.config import _get_env_overrides
+            from backend.verification.config.config import _get_env_overrides
             overrides = _get_env_overrides()
         assert "max_retries" not in overrides
 
@@ -295,7 +295,7 @@ class TestConfigLoader:
         assert env == "production"
 
     def test_get_config_loader_singleton(self):
-        import verification.config.config_loader as cl_module
+        import backend.verification.config.config_loader as cl_module
         cl_module._config_loader = None  # reset
         loader1 = get_config_loader()
         loader2 = get_config_loader()
@@ -353,7 +353,7 @@ class TestConfigLoadingIntegration:
             _reset_singleton()
             cfg = load_config_from_yaml(config_dir=CONFIG_DIR, environment=env)
             # Re-validate by constructing from dict
-            reloaded = VerificationConfig(**cfg.dict())
+            reloaded = VerificationConfig(**cfg.model_dump())
             assert reloaded == cfg
 
     def test_get_default_config_is_valid(self):

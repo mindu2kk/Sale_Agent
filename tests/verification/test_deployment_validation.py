@@ -1,4 +1,4 @@
-"""
+﻿"""
 Deployment Validation Tests - Task 7.3.5
 
 Validates that the binary verification system is correctly deployed and operational.
@@ -25,27 +25,27 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from verification.api import app
-from verification.config.binary_verification_config import (
+from backend.verification.api import app
+from backend.verification.config.binary_verification_config import (
     BinaryVerificationConfig,
     get_binary_verification_config,
 )
-from verification.config.config import VerificationConfig
-from verification.utils.circuit_breaker import (
+from backend.verification.config.config import VerificationConfig
+from backend.verification.utils.circuit_breaker import (
     CircuitState,
     get_circuit_breaker_registry,
     reset_circuit_breaker_registry,
 )
-from verification.utils.graceful_shutdown import (
+from backend.verification.utils.graceful_shutdown import (
     ShutdownManager,
     get_shutdown_manager,
     reset_shutdown_manager,
 )
-from verification.utils.health_check import (
+from backend.verification.utils.health_check import (
     HealthStatus,
     reset_health_checker,
 )
-from verification.utils.error_rate_tracker import reset_error_rate_tracker
+from backend.verification.utils.error_rate_tracker import reset_error_rate_tracker
 
 
 # ---------------------------------------------------------------------------
@@ -274,7 +274,7 @@ class TestConfigurationValidation:
 
     def test_config_runtime_update_without_restart(self):
         """Config must support runtime updates without restart (Req 10.5)."""
-        from verification.config.binary_verification_config import get_runtime_config_manager
+        from backend.verification.config.binary_verification_config import get_runtime_config_manager
         manager = get_runtime_config_manager()
         original_tolerance = manager.get_config().price_accuracy.pass_tolerance_percent
 
@@ -314,7 +314,7 @@ class TestComponentAvailability:
 
     def test_price_accuracy_checker_instantiates(self):
         """PriceAccuracyChecker must instantiate with mocked dependencies."""
-        from verification.agent.checkers import PriceAccuracyChecker
+        from backend.verification.agent.checkers import PriceAccuracyChecker
         config = VerificationConfig()
         checker = PriceAccuracyChecker(
             llm=MagicMock(),
@@ -325,7 +325,7 @@ class TestComponentAvailability:
 
     def test_policy_authenticity_checker_instantiates(self):
         """PolicyAuthenticityChecker must instantiate with mocked dependencies."""
-        from verification.agent.checkers import PolicyAuthenticityChecker
+        from backend.verification.agent.checkers import PolicyAuthenticityChecker
         config = VerificationConfig()
         checker = PolicyAuthenticityChecker(
             llm=MagicMock(),
@@ -336,7 +336,7 @@ class TestComponentAvailability:
 
     def test_topic_relevance_checker_instantiates(self):
         """TopicRelevanceChecker must instantiate with mocked dependencies."""
-        from verification.agent.checkers import TopicRelevanceChecker
+        from backend.verification.agent.checkers import TopicRelevanceChecker
         config = VerificationConfig()
         checker = TopicRelevanceChecker(
             llm=MagicMock(),
@@ -346,7 +346,7 @@ class TestComponentAvailability:
 
     def test_verification_agent_instantiates(self):
         """VerificationAgent must instantiate with mocked LLM and RAG pipeline."""
-        from verification.agent.verification_agent import VerificationAgent
+        from backend.verification.agent.verification_agent import VerificationAgent
         config = VerificationConfig()
         agent = VerificationAgent(
             llm=MagicMock(),
@@ -360,14 +360,14 @@ class TestComponentAvailability:
 
     def test_workflow_router_instantiates(self):
         """WorkflowRouter must instantiate with config."""
-        from verification.workflow.routing import WorkflowRouter
+        from backend.verification.workflow.routing import WorkflowRouter
         config = VerificationConfig()
         router = WorkflowRouter(config)
         assert router is not None
 
     def test_self_correction_node_instantiates(self):
         """SelfCorrectionNode must instantiate with config."""
-        from verification.workflow.correction import SelfCorrectionNode
+        from backend.verification.workflow.correction import SelfCorrectionNode
         config = VerificationConfig()
         node = SelfCorrectionNode(config)
         assert node is not None
@@ -468,7 +468,7 @@ class TestCircuitBreakerState:
 
     def test_new_circuit_breaker_starts_closed(self):
         """A freshly created circuit breaker must start in CLOSED state."""
-        from verification.utils.circuit_breaker import CircuitBreaker
+        from backend.verification.utils.circuit_breaker import CircuitBreaker
         cb = CircuitBreaker("test_service", failure_threshold=5)
         assert cb.state == CircuitState.CLOSED
 
@@ -481,13 +481,13 @@ class TestCircuitBreakerState:
 
     def test_circuit_breaker_allows_requests_when_closed(self):
         """CLOSED circuit must allow all requests through."""
-        from verification.utils.circuit_breaker import CircuitBreaker
+        from backend.verification.utils.circuit_breaker import CircuitBreaker
         cb = CircuitBreaker("test_service", failure_threshold=5)
         assert cb.allow_request() is True
 
     def test_circuit_breaker_opens_after_threshold_failures(self):
         """Circuit must open after reaching failure threshold."""
-        from verification.utils.circuit_breaker import CircuitBreaker
+        from backend.verification.utils.circuit_breaker import CircuitBreaker
         cb = CircuitBreaker("test_service", failure_threshold=3)
         for _ in range(3):
             cb.record_failure("TestError")
@@ -495,7 +495,7 @@ class TestCircuitBreakerState:
 
     def test_circuit_breaker_reset_returns_to_closed(self):
         """Manual reset must return circuit to CLOSED state."""
-        from verification.utils.circuit_breaker import CircuitBreaker
+        from backend.verification.utils.circuit_breaker import CircuitBreaker
         cb = CircuitBreaker("test_service", failure_threshold=2)
         cb.record_failure("Error")
         cb.record_failure("Error")
@@ -548,7 +548,7 @@ class TestBinaryDecisionConsistency:
 
     def test_price_checker_deterministic_pass(self):
         """PriceAccuracyChecker must return same result for same input."""
-        from verification.agent.checkers import PriceAccuracyChecker
+        from backend.verification.agent.checkers import PriceAccuracyChecker
         config = VerificationConfig()
         checker = PriceAccuracyChecker(
             llm=MagicMock(),
@@ -565,7 +565,7 @@ class TestBinaryDecisionConsistency:
 
     def test_policy_checker_deterministic_no_policies(self):
         """PolicyAuthenticityChecker must return same result for input with no policies."""
-        from verification.agent.checkers import PolicyAuthenticityChecker
+        from backend.verification.agent.checkers import PolicyAuthenticityChecker
         config = VerificationConfig()
         checker = PolicyAuthenticityChecker(
             llm=MagicMock(),
@@ -603,8 +603,8 @@ class TestAsyncWorkflowStartup:
 
     def test_verification_workflow_instantiates(self):
         """VerificationWorkflow must instantiate with mocked agents."""
-        from verification.workflow.workflow import VerificationWorkflow
-        from verification.agent.verification_agent import VerificationAgent
+        from backend.verification.workflow.workflow import VerificationWorkflow
+        from backend.verification.agent.verification_agent import VerificationAgent
 
         config = VerificationConfig()
         agent = VerificationAgent(
@@ -622,8 +622,8 @@ class TestAsyncWorkflowStartup:
 
     def test_verification_workflow_graph_has_required_nodes(self):
         """StateGraph must contain research, verification, correction, escalation nodes."""
-        from verification.workflow.workflow import VerificationWorkflow
-        from verification.agent.verification_agent import VerificationAgent
+        from backend.verification.workflow.workflow import VerificationWorkflow
+        from backend.verification.agent.verification_agent import VerificationAgent
 
         config = VerificationConfig()
         agent = VerificationAgent(
@@ -642,8 +642,8 @@ class TestAsyncWorkflowStartup:
     @pytest.mark.asyncio
     async def test_verification_agent_verify_draft_async(self):
         """VerificationAgent.verify_draft() must be awaitable and return a VerificationResult."""
-        from verification.agent.verification_agent import VerificationAgent
-        from verification.models.verification import VerificationResult
+        from backend.verification.agent.verification_agent import VerificationAgent
+        from backend.verification.models.verification import VerificationResult
 
         config = VerificationConfig()
         agent = VerificationAgent(
@@ -691,7 +691,7 @@ class TestAsyncWorkflowStartup:
     @pytest.mark.asyncio
     async def test_verification_completes_within_10_seconds(self):
         """Verification must complete within ≤10 seconds (Req 9.1)."""
-        from verification.agent.verification_agent import VerificationAgent
+        from backend.verification.agent.verification_agent import VerificationAgent
 
         config = VerificationConfig(async_timeout_seconds=10)
         agent = VerificationAgent(

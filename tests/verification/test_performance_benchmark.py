@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests: PerformanceBenchmark
 
 Tests for the performance benchmarking module that validates optimization work
@@ -10,7 +10,7 @@ Supports Task 5.4.5: Add performance benchmarking cho optimization validation
 import asyncio
 import pytest
 
-from verification.utils.performance_benchmark import (
+from backend.verification.utils.performance_benchmark import (
     BenchmarkReport,
     BenchmarkSuite,
     BenchmarkSuiteResult,

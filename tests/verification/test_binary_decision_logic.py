@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for binary decision logic in VerificationAgent (Task 2.4.3)
 
 Tests cover:
@@ -16,7 +16,7 @@ import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import datetime
 
-from verification.models.verification import (
+from backend.verification.models.verification import (
     VerificationResult,
     RubricCriteria,
     PriceIssue,
@@ -24,8 +24,8 @@ from verification.models.verification import (
     RelevanceIssue,
     IssueSeverity,
 )
-from verification.agent.verification_agent import VerificationAgent
-from verification.config import VerificationConfig
+from backend.verification.agent.verification_agent import VerificationAgent
+from backend.verification.config import VerificationConfig
 
 
 # ---------------------------------------------------------------------------

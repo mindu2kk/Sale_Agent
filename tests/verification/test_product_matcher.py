@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit tests for ProductMatcher
 
 Tests cover:
@@ -11,7 +11,7 @@ Tests cover:
 """
 
 import pytest
-from verification.utils.product_matcher import (
+from backend.verification.utils.product_matcher import (
     ProductMatcher,
     ProductMatch,
     _normalize,

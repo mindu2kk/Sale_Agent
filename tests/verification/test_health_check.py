@@ -1,4 +1,4 @@
-"""
+﻿"""
 Unit Tests for Health Check Module - Task 6.3.4
 
 Tests for verification/utils/health_check.py covering:
@@ -12,17 +12,17 @@ Tests for verification/utils/health_check.py covering:
 import asyncio
 import pytest
 
-from verification.utils.circuit_breaker import (
+from backend.verification.utils.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerRegistry,
     reset_circuit_breaker_registry,
 )
-from verification.utils.error_rate_tracker import (
+from backend.verification.utils.error_rate_tracker import (
     ErrorRateTracker,
     get_error_rate_tracker,
     reset_error_rate_tracker,
 )
-from verification.utils.health_check import (
+from backend.verification.utils.health_check import (
     CircuitBreakerHealthDetail,
     ErrorRateHealthDetail,
     HealthChecker,
@@ -106,9 +106,9 @@ class TestServiceHealthDetail:
 
     def test_closed_circuit_is_healthy(self):
         registry = reset_circuit_breaker_registry() or __import__(
-            "verification.utils.circuit_breaker", fromlist=["get_circuit_breaker_registry"]
+            "backend.verification.utils.circuit_breaker", fromlist=["get_circuit_breaker_registry"]
         )
-        from verification.utils.circuit_breaker import get_circuit_breaker_registry
+        from backend.verification.utils.circuit_breaker import get_circuit_breaker_registry
         reg = get_circuit_breaker_registry()
         reg.get_or_create("llm_api", failure_threshold=5)
 
@@ -118,7 +118,7 @@ class TestServiceHealthDetail:
         assert detail.circuit_state == "closed"
 
     def test_open_circuit_is_unhealthy(self):
-        from verification.utils.circuit_breaker import get_circuit_breaker_registry
+        from backend.verification.utils.circuit_breaker import get_circuit_breaker_registry
         reg = get_circuit_breaker_registry()
         cb = reg.get_or_create("llm_api", failure_threshold=2)
         # Force open
@@ -131,7 +131,7 @@ class TestServiceHealthDetail:
         assert detail.circuit_state == "open"
 
     def test_half_open_circuit_is_degraded(self):
-        from verification.utils.circuit_breaker import get_circuit_breaker_registry, CircuitState
+        from backend.verification.utils.circuit_breaker import get_circuit_breaker_registry, CircuitState
         reg = get_circuit_breaker_registry()
         cb = reg.get_or_create("llm_api", failure_threshold=2, cooldown_seconds=0.0)
         cb.record_failure("TestError")
@@ -145,7 +145,7 @@ class TestServiceHealthDetail:
         assert detail.status in (HealthStatus.DEGRADED, HealthStatus.UNHEALTHY)
 
     def test_approaching_threshold_is_degraded(self):
-        from verification.utils.circuit_breaker import get_circuit_breaker_registry
+        from backend.verification.utils.circuit_breaker import get_circuit_breaker_registry
         reg = get_circuit_breaker_registry()
         cb = reg.get_or_create("llm_api", failure_threshold=5)
         # 3 failures out of 5 threshold = 60% → degraded
@@ -170,7 +170,7 @@ class TestCircuitBreakerHealthDetail:
         assert detail.total_circuits == 0
 
     def test_all_closed_is_healthy(self):
-        from verification.utils.circuit_breaker import get_circuit_breaker_registry
+        from backend.verification.utils.circuit_breaker import get_circuit_breaker_registry
         reg = get_circuit_breaker_registry()
         reg.get_or_create("svc_a")
         reg.get_or_create("svc_b")
@@ -182,7 +182,7 @@ class TestCircuitBreakerHealthDetail:
         assert detail.open_circuits == []
 
     def test_open_circuit_makes_unhealthy(self):
-        from verification.utils.circuit_breaker import get_circuit_breaker_registry
+        from backend.verification.utils.circuit_breaker import get_circuit_breaker_registry
         reg = get_circuit_breaker_registry()
         cb = reg.get_or_create("svc_a", failure_threshold=1)
         cb.record_failure("Err")
@@ -294,7 +294,7 @@ class TestHealthCheckerAsync:
 
     @pytest.mark.asyncio
     async def test_check_unhealthy_when_circuit_open(self):
-        from verification.utils.circuit_breaker import get_circuit_breaker_registry
+        from backend.verification.utils.circuit_breaker import get_circuit_breaker_registry
         reg = get_circuit_breaker_registry()
         cb = reg.get_or_create("llm_api", failure_threshold=1)
         cb.record_failure("TestError")
@@ -313,7 +313,7 @@ class TestHealthCheckerAsync:
 
     @pytest.mark.asyncio
     async def test_is_ready_unhealthy(self):
-        from verification.utils.circuit_breaker import get_circuit_breaker_registry
+        from backend.verification.utils.circuit_breaker import get_circuit_breaker_registry
         reg = get_circuit_breaker_registry()
         cb = reg.get_or_create("llm_api", failure_threshold=1)
         cb.record_failure("TestError")

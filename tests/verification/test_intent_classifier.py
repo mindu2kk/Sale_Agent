@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for IntentClassifier
 
 Covers:
@@ -11,16 +11,16 @@ Covers:
 """
 
 import pytest
-from verification.utils.intent_classifier import (
+from backend.verification.utils.intent_classifier import (
     IntentClassifier,
     ClassificationResult,
     IntentScore,
     INTENT_TAXONOMY,
     INTENT_LABELS,
 )
-from verification.agent.checkers import TopicRelevanceChecker
-from verification.config.config import VerificationConfig
-from verification.config.thresholds_config import TopicRelevanceThresholds
+from backend.verification.agent.checkers import TopicRelevanceChecker
+from backend.verification.config.config import VerificationConfig
+from backend.verification.config.thresholds_config import TopicRelevanceThresholds
 
 
 # ---------------------------------------------------------------------------
