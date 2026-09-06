@@ -1,442 +1,116 @@
-# 🤖 AI Sales Copilot
+# AURA AI Sales Advisor
 
-Hệ thống AI Agent thông minh giúp tư vấn bán hàng với khả năng:
-- 🔍 Tìm kiếm thông tin sản phẩm từ database nội bộ
-- 🌐 Tra cứu thông tin bổ sung từ Internet (Tavily)
-- ✅ Tự động verify độ chính xác của câu trả lời
-- 🔄 Self-correction khi phát hiện lỗi
-- 📊 Escalate lên human khi cần thiết
+A catalog-grounded sales advisor for laptops and phones. The React storefront
+talks to a FastAPI gateway that provides product search, grounded chat,
+comparison, decision traces for development, and deterministic fallbacks when
+external AI services are unavailable.
 
-## 🚀 Quick Start
+## Local development
 
-### Cách 1: Docker (Khuyến nghị - Dễ nhất!) 🐳
-
-**Yêu cầu**: Chỉ cần Docker Desktop
+Requirements: Python 3.11+, Node.js 20+, and optionally Docker Desktop.
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/mindu2kk/Sale_Agent.git
-cd Sale_Agent
-
-# 2. Tạo file .env (copy từ .env.example và điền API keys)
-cp .env.example .env
-
-# 3. Khởi động
-docker-compose up -d
-
-# 4. Truy cập
-# Frontend: http://localhost:5173
-# Backend: http://localhost:8000
+Copy-Item .env.example .env       # Windows PowerShell
+python -m pip install -r requirements.txt
+python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-👉 **Hướng dẫn chi tiết**: [HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md)
+In a second terminal:
 
-### Cách 2: Local Scripts
-
-**Windows (1 lệnh duy nhất):**
-```bash
-start.bat
-```
-
-**Linux/Mac:**
-```bash
-chmod +x start.sh
-./start.sh
-```
-
-Mở trình duyệt tại: **http://localhost:5173**
-
----
-
-## 📋 Yêu Cầu Hệ Thống
-
-### Với Docker (Khuyến nghị):
-- **Docker Desktop** - https://www.docker.com/products/docker-desktop
-- **API Keys:**
-  - Google Gemini API
-  - Tavily API
-  - LlamaCloud API
-
-### Với Local Development:
-- **Python 3.10+** - https://www.python.org
-- **Node.js 18+** - https://nodejs.org
-- **API Keys** (như trên)
-
----
-
-## 🛠️ Installation
-
-### Cách 1: Docker Compose (Khuyến nghị - Ai cũng chạy được!)
-
-```bash
-# Build và start
-docker-compose up -d
-
-# Xem logs
-docker-compose logs -f
-
-# Dừng
-docker-compose down
-```
-
-**Windows Scripts:**
-```bash
-docker-start.bat   # Khởi động
-docker-stop.bat    # Dừng
-```
-
-👉 **Chi tiết**: [HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md)
-
-### Cách 2: Startup Scripts
-
-**Windows:**
-```bash
-start.bat  # Chạy toàn bộ hệ thống
-stop.bat   # Dừng hệ thống
-```
-
-**Linux/Mac:**
-```bash
-./start.sh  # Chạy toàn bộ hệ thống
-./stop.sh   # Dừng hệ thống
-```
-
-### Cách 3: Manual
-
-**Terminal 1 - Backend:**
-```bash
-pip install -r requirements.txt
-python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-**Terminal 2 - Frontend:**
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-Xem chi tiết: **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)**
+Open <http://localhost:5173>. The local Vite server proxies API requests to
+`http://127.0.0.1:8000` by default. `start.bat` and `start.sh` provide the
+same local startup flow.
 
----
+The default deterministic catalog advisor works without external API keys.
+Enable external research or LLM wording only after setting the corresponding
+variables in `.env`; see [`.env.example`](.env.example).
 
-## 📁 Cấu Trúc Dự Án
+## Deployment
 
-```
-DuAnTTCS/
-├── agent/                    # Sales Research Agent (LlamaIndex + ReAct)
-│   ├── sales_research_agent.py
-│   ├── tools.py
-│   └── prompts.py
-│
-├── verification/             # Verification Agent (LangGraph workflow)
-│   ├── agent/                # Verification logic
-│   ├── workflow/             # LangGraph routing, correction
-│   ├── models/               # Pydantic models
-│   ├── config/               # Configuration files
-│   └── utils/                # Utilities (logging, caching, etc.)
-│
-├── retriever/                # Hybrid Retriever (BM25 + Vector)
-│   ├── hybrid_retriever.py
-│   └── relevance_checker.py
-│
-├── backend/                  # FastAPI API Gateway
-│   ├── main.py               # API endpoints
-│   ├── stream_relay.py       # SSE streaming
-│   ├── database.py           # SQLite chat history
-│   └── workflow_factory.py   # Workflow initialization
-│
-├── frontend/                 # React + TypeScript UI
-│   ├── src/
-│   │   ├── components/
-│   │   ├── services/
-│   │   └── App.tsx
-│   └── package.json
-│
-├── tests/                    # Test suites (2601 tests)
-│   ├── test_unit.py
-│   ├── test_integration.py
-│   └── verification/
-│
-├── chroma_db/                # Vector store (ChromaDB)
-├── chat.db                   # Chat history (SQLite)
-├── .env                      # API keys and config
-├── requirements.txt          # Python dependencies
-│
-├── start.bat / start.sh      # Startup scripts
-├── stop.bat / stop.sh        # Stop scripts
-├── docker-compose.yml        # Docker configuration
-└── README.md                 # This file
+The frontend can be deployed to Vercel and the FastAPI service to Render (or
+another Python host). Set this Vercel environment variable for every deployed
+frontend environment:
+
+```text
+VITE_API_BASE_URL=https://internship-eewx.onrender.com
 ```
 
----
+Vite exposes only variables with the `VITE_` prefix to browser code. Do not
+put API keys or bearer tokens in Vercel frontend variables.
 
-## 🎯 Kiến Trúc Hệ Thống
-
-```
-┌─────────────────┐
-│   User/Browser  │
-└────────┬────────┘
-         │ HTTP
-         ▼
-┌─────────────────────────────────────────────────────┐
-│            Frontend (React + TypeScript)             │
-│  • Real-time chat UI                                │
-│  • SSE streaming                                    │
-│  • Message history                                  │
-└──────────────────────┬──────────────────────────────┘
-                       │ SSE
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│          Backend (FastAPI API Gateway)               │
-│  • Auth (Bearer token)                              │
-│  • Chat threads management                          │
-│  • SSE streaming relay                              │
-│  • Health checks                                    │
-└──────────────────────┬──────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────┐
-│       Verification Workflow (LangGraph)              │
-│                                                      │
-│   ┌──────────────┐       ┌──────────────┐          │
-│   │   Research   │──────▶│ Verification │          │
-│   │     Node     │       │     Node     │          │
-│   └──────────────┘       └──────┬───────┘          │
-│          │                      │                   │
-│          │                      ▼                   │
-│          │              ┌───────────────┐           │
-│          │              │   Approved?   │           │
-│          │              └───────┬───────┘           │
-│          │                      │                   │
-│          │           ┌──────────┴──────────┐        │
-│          │           │                     │        │
-│          │           ▼                     ▼        │
-│          │    ┌──────────┐         ┌──────────┐    │
-│          └───▶│Correction│         │Escalation│    │
-│               │   Node   │         │   Node   │    │
-│               └──────────┘         └──────────┘    │
-│                                                      │
-└──────────────────────┬──────────────────────────────┘
-                       │
-         ┌─────────────┴─────────────┐
-         ▼                           ▼
-┌──────────────────┐      ┌──────────────────┐
-│ Research Agent   │      │ Vector Store     │
-│ (LlamaIndex)     │      │ (ChromaDB)       │
-│                  │      │                  │
-│ • Internal DB    │      │ • BM25 search    │
-│ • Tavily search  │      │ • Vector search  │
-│ • ReAct loop     │      │ • Hybrid ranking │
-└──────────────────┘      └──────────────────┘
-```
-
----
-
-## ⚙️ Cấu Hình
-
-### File `.env`
-
-```env
-# API Keys
-LLAMA_CLOUD_API_KEY=llx-...
-GOOGLE_API_KEY=AQ.Ab8RN6JF...
-TAVILY_API_KEY=tvly-dev-...
-
-# API Gateway
-API_BEARER_TOKEN=dev-token-123
-FRONTEND_URL=http://localhost:5173
-
-# LLM Model
-LLM_MODEL=gemini-2.5-flash  # hoặc gemini-1.5-pro, gpt-4, etc.
-```
-
-### Thay đổi cấu hình nâng cao:
-
-- **Verification thresholds:** `verification/config/thresholds.yaml`
-- **Prompts:** `verification/config/prompts.yaml`
-- **Workflow config:** `verification/config/workflow_config.yaml`
-- **Logging:** `verification/config/logging_config.yaml`
-
----
-
-## 🧪 Testing
+For a local Docker development stack:
 
 ```bash
-# Chạy toàn bộ test suite (2601 tests)
-pytest
-
-# Chạy với coverage
-pytest --cov=. --cov-report=html
-
-# Chạy tests cụ thể
-pytest tests/test_unit.py
-pytest tests/verification/
+docker compose up --build
 ```
 
-**Test results:** 2601 tests passed ✅
+The current Compose file runs the Vite development server and FastAPI gateway;
+it is not a hardened production image. See
+[docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) for the deployment
+checklist.
 
----
-
-## 📊 Performance
-
-### Backend Startup Time:
-- **Before optimization:** ~60 giây
-- **After lazy loading:** ~0.1 giây (100ms) ✅
-- **First request:** ~60 giây (load AI workflow)
-- **Subsequent requests:** Instant ✅
-
-### Response Time:
-- **Simple queries:** 2-5 giây
-- **Complex queries (web search):** 5-10 giây
-- **With verification:** +2-3 giây
-
----
-
-## 📚 Tài Liệu Bổ Sung
-
-- **[HUONG_DAN_CHAY_DU_AN.md](HUONG_DAN_CHAY_DU_AN.md)** - 🔥 Hướng dẫn chạy cho người mới (Docker)
-- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Hướng dẫn deploy chi tiết
-- **[DOCKER_QUICK_START.md](DOCKER_QUICK_START.md)** - Docker quick start
-- **[HOW_TO_RUN_DOCKER.md](HOW_TO_RUN_DOCKER.md)** - Docker detailed guide
-- **[PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md)** - Tối ưu hóa hiệu suất
-- **[API_QUOTA_SOLUTION.md](API_QUOTA_SOLUTION.md)** - Xử lý lỗi API quota
-- **[STARTUP_OPTIMIZATION_RESULTS.md](STARTUP_OPTIMIZATION_RESULTS.md)** - Kết quả tối ưu
-- **[HYBRID_RETRIEVER_EXPLAINED.md](HYBRID_RETRIEVER_EXPLAINED.md)** - Giải thích Hybrid Retriever
-- **[SALES_RESEARCH_AGENT_EXPLAINED.md](SALES_RESEARCH_AGENT_EXPLAINED.md)** - Giải thích Research Agent
-- **[VERIFICATION_AGENT_EXPLAINED.md](VERIFICATION_AGENT_EXPLAINED.md)** - Giải thích Verification Agent
-
----
-
-## 🐛 Troubleshooting
-
-### Port đã được sử dụng:
-
-**Windows:**
-```bash
-netstat -ano | findstr :8000
-taskkill /F /PID <PID>
-```
-
-**Linux/Mac:**
-```bash
-lsof -ti:8000 | xargs kill -9
-```
-
-### API Quota exhausted:
-
-Thêm `OPENAI_API_KEY` vào `.env` để dùng OpenAI thay vì Gemini:
-```env
-OPENAI_API_KEY=sk-...
-LLM_MODEL=gpt-4
-```
-
-### Dependencies issues:
+## Quality checks
 
 ```bash
-# Python
-pip install --upgrade -r requirements.txt
-
-# Node.js
-cd frontend && rm -rf node_modules && npm install
+python -m compileall -q backend
+cd frontend && npm ci && npm run lint && npm run build
 ```
 
----
-
-## 🚢 Production Deployment
-
-### Với Docker Compose:
+GitHub Actions runs the backend syntax check and the frontend lint/build on
+pull requests and pushes to `main`. The full pytest suite remains an explicit
+local verification command because it contains long-running integration and
+runtime-contract coverage:
 
 ```bash
-# 1. Build images
-docker-compose build
-
-# 2. Start services
-docker-compose up -d
-
-# 3. Check status
-docker-compose ps
-
-# 4. View logs
-docker-compose logs -f
+python -m pytest -q
 ```
 
-### Với Nginx Reverse Proxy:
+## Architecture
 
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
+This is a modular monolith, intentionally organized by runtime boundary rather
+than deployed as independent microservices:
 
-    # Frontend
-    location / {
-        proxy_pass http://localhost:5173;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-
-    # Backend API
-    location /api {
-        proxy_pass http://localhost:8000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # SSE support
-        proxy_buffering off;
-        proxy_cache off;
-        proxy_read_timeout 300s;
-    }
-}
+```text
+backend/
+  api/             FastAPI schemas and route handlers
+  services/        catalog, AI orchestration, policy and ranking logic
+  harness/         execution budgets, trace, preflight and postflight guards
+  agent/           domain contract, query framing and response verification
+  retrieval/       RAG and hybrid retrieval components
+  verification/    verification workflow and support utilities
+  workflows/       research-agent workflow
+frontend/          React/Vite storefront
+data/              catalog, policies and product images
+scripts/           ingestion and catalog maintenance utilities
+tests/             automated tests
 ```
 
----
+API routes stay in `backend.api`; business logic stays in `backend.services`;
+new runtime modules must not be added directly under `backend/`. Compatibility
+shims at that level exist only for legacy imports.
 
-## 🤝 Contributing
+More detail: [project structure](docs/PROJECT_STRUCTURE.md).
 
-1. Fork the project
-2. Create your feature branch: `git checkout -b feature/AmazingFeature`
-3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
-4. Push to the branch: `git push origin feature/AmazingFeature`
-5. Open a Pull Request
+## API endpoints
 
----
+- `GET /health` — service and catalog status
+- `GET /api/products` — catalog search and filters
+- `GET /api/products/featured` — storefront cards
+- `POST /api/chat` — grounded advisor interaction
+- `GET /metrics` — development metrics (do not expose publicly without an
+  access-control layer)
 
-## 📝 License
+## Repository hygiene
 
-This project is licensed under the MIT License.
-
----
-
-## 👥 Authors
-
-- **Your Name** - Initial work
-
----
-
-## 🙏 Acknowledgments
-
-- LlamaIndex - RAG framework
-- LangGraph - Agent workflow orchestration
-- FastAPI - Modern web framework
-- React - Frontend library
-- ChromaDB - Vector database
-
----
-
-## 📞 Support
-
-Nếu gặp vấn đề, vui lòng:
-1. Xem [Troubleshooting](#-troubleshooting)
-2. Đọc [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
-3. Tạo GitHub Issue
-4. Liên hệ: your.email@example.com
-
----
-
-**Made with ❤️ by AI Sales Copilot Team**
+- `.env`, local databases, logs, generated frontend output, dependency caches,
+  and scratch clones are ignored.
+- Source, tests, Docker configuration, and Markdown documentation remain
+  trackable.
+- The `archive/` and `tools/scratch/` directories are deliberately excluded
+  from the production source tree.
