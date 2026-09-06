@@ -215,10 +215,13 @@ class EscalationThresholds(BaseModel):
         total_count: int,
         has_fabricated_policy: bool = False,
         has_critical_price_deviation: bool = False,
+        is_completely_irrelevant: bool = False,
     ) -> bool:
         if self.fabricated_policy_immediate_escalation and has_fabricated_policy:
             return True
         if self.critical_price_deviation_escalation and has_critical_price_deviation:
+            return True
+        if self.completely_irrelevant_escalation and is_completely_irrelevant:
             return True
         if critical_count > self.max_critical_issues_before_escalation:
             return True
@@ -504,3 +507,20 @@ def enhanced_load_thresholds_config(config_path: str) -> VerificationThresholdsC
     env_overrides = _get_thresholds_env_overrides()
     _deep_merge(data, env_overrides)
     return VerificationThresholdsConfig(**data)
+
+
+def save_thresholds_config(
+    config: VerificationThresholdsConfig,
+    config_path: str,
+) -> None:
+    """Persist a validated thresholds configuration as human-readable YAML."""
+
+    path = Path(config_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as handle:
+        yaml.safe_dump(
+            config.model_dump(mode="json"),
+            handle,
+            allow_unicode=True,
+            sort_keys=False,
+        )

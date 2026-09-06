@@ -259,37 +259,26 @@ class ConfigLoader:
 
         # Define environment variable mappings
         env_mappings = {
-            'VERIFICATION_PRICE_TOLERANCE': ('price_accuracy', 'tolerance_percent', float),
-            'VERIFICATION_MAX_RETRIES': ('retry_settings', 'max_retries', int),
-            'VERIFICATION_PARALLEL_CHECKS': ('performance', 'parallel_verification', bool),
-            'VERIFICATION_LOG_LEVEL': ('logging', 'level', str),
-            'VERIFICATION_CACHE_ENABLED': ('performance', 'caching', 'enabled', bool),
-            'VERIFICATION_TIMEOUT': ('performance', 'verification_timeout_seconds', int),
+            'VERIFICATION_PRICE_TOLERANCE': (('price_accuracy', 'tolerance_percent'), float),
+            'VERIFICATION_MAX_RETRIES': (('retry_settings', 'max_retries'), int),
+            'VERIFICATION_PARALLEL_CHECKS': (('performance', 'parallel_verification'), bool),
+            'VERIFICATION_LOG_LEVEL': (('logging', 'level'), str),
+            'VERIFICATION_CACHE_ENABLED': (('performance', 'caching', 'enabled'), bool),
+            'VERIFICATION_TIMEOUT': (('performance', 'verification_timeout_seconds'), int),
         }
 
-        for env_var, (section, key, *rest) in env_mappings.items():
+        for env_var, (path, value_type) in env_mappings.items():
             env_value = os.getenv(env_var)
             if env_value is not None:
                 try:
-                    # Handle nested configuration paths
-                    if rest:
-                        nested_key, value_type = rest[0], rest[1] if len(rest) > 1 else str
-                        if section not in result:
-                            result[section] = {}
-                        if key not in result[section]:
-                            result[section][key] = {}
-
-                        # Convert value to appropriate type
-                        converted_value = self._convert_env_value(env_value, value_type)
-                        result[section][key][nested_key] = converted_value
-                    else:
-                        value_type = key if len(rest) == 0 else rest[0]
-                        if section not in result:
-                            result[section] = {}
-
-                        # Convert value to appropriate type
-                        converted_value = self._convert_env_value(env_value, value_type)
-                        result[section][key] = converted_value
+                    target = result
+                    for key in path[:-1]:
+                        nested = target.get(key)
+                        if not isinstance(nested, dict):
+                            nested = {}
+                            target[key] = nested
+                        target = nested
+                    target[path[-1]] = self._convert_env_value(env_value, value_type)
 
                     logger.info(f"Applied environment override: {env_var}={env_value}")
 
