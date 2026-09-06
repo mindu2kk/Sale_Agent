@@ -1,32 +1,47 @@
-# Markdown docs (keep only README.md)
-*.md
-!README.md
+# ---------------------------------------------------------------------------
+# AURA AI Sales Advisor - Git ignore rules
+# Keep source, documentation, tests, and small reproducible catalog assets.
+# Ignore secrets, local runtime state, generated artifacts, caches, and builds.
+# ---------------------------------------------------------------------------
 
-# Environment variables & secrets
+# Environment variables and secrets
 .env
 .env.*
 *.env
 !.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
 
-# Python
+# Python bytecode and caches
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-*.egg
-*.egg-info/
-dist/
-build/
-eggs/
-parts/
-var/
-sdist/
-develop-eggs/
-.installed.cfg
-lib/
-lib64/
 *.pyo
 *.pyd
+*.so
+.python-version
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+.pytest_cache/
+.hypothesis/
+.tox/
+.nox/
+
+# Python packaging/build output
+build/
+dist/
+sdist/
+wheelhouse/
+*.egg
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
 
 # Virtual environments
 .venv/
@@ -35,59 +50,100 @@ env/
 ENV/
 .virtualenv/
 
-# Testing & coverage
-.pytest_cache/
-.hypothesis/
+# Test and coverage artifacts
 htmlcov/
 .coverage
 .coverage.*
 coverage.xml
 *.cover
+*.py,cover
 nosetests.xml
+junit.xml
 test-results/
+playwright-report/
+coverage/
 
-# Jupyter
-.ipynb_checkpoints/
-*.ipynb
+# Node / frontend artifacts
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.eslintcache
+frontend/coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# IDEs
+# Runtime databases and generated stores
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+chroma_db/
+.chromadb/
+
+# Logs and local outputs
+logs/
+output/
+tmp/
+temp/
+*.tmp
+*.temp
+*.log
+*.log.*
+
+# Data files that are local, raw, or too large for normal Git history
+data/product_catalog_raw.xlsx
+data/product_catalog_raw.csv
+data/**/*.tmp
+data/**/*.bak
+data/**/*.zip
+data/**/*.7z
+data/**/*.rar
+
+# Generated media/export artifacts
+*.bak
+*.orig
+*.rej
+*.pid
+*.seed
+*.dump
+*.trace
+*.prof
+*.png.tmp
+*.pdf.tmp
+
+# IDE/editor folders
 .vscode/
 .idea/
+.fleet/
+.cursor/
 *.swp
 *.swo
 *~
 
-# Kiro
+# Tool-specific local state
 .kiro/
+.codex/
 
-# Logs
-logs/
-*.log
-*.log.*
+# Local archive/scratch material kept outside the GitHub source submission
+archive/
+tools/scratch/
+_push_tmp_*/
+.pydeps/
+.pydeps_min/
 
-# Data files (large/sensitive)
-data/product_catalog_raw.xlsx
-data/product_catalog_raw.csv
-
-# ChromaDB (vector store - can be rebuilt)
-chroma_db/
-
-# OS
+# OS files
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Docker
-*.dockerignore
+# Docker/local compose overrides
+docker-compose.override.yml
+*.dockerignore.bak
 
-# SQLite databases (runtime data)
-*.db
-*.db-shm
-*.db-wal
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-*.bak
-*.orig
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb

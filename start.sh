@@ -47,7 +47,7 @@ if [ ! -d "frontend/node_modules" ]; then
 fi
 
 echo "[3/4] Starting Backend Server..."
-python3 -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload &
+python3 -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 echo "Backend PID: $BACKEND_PID"
 

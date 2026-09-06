@@ -51,13 +51,25 @@ if not exist frontend\node_modules (
 )
 
 echo [3/4] Starting Backend Server...
-start "AI Sales Copilot - Backend" cmd /k "python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload"
+netstat -aon | findstr "LISTENING" | findstr ":8000" >nul
+if not errorlevel 1 (
+    echo Backend is already running on port 8000. Skipping duplicate process.
+) else (
+    REM Watch source folders only. Do not scan node_modules, catalog images,
+    REM Chroma, output, or other large generated directories.
+    start "AI Sales Copilot - Backend" cmd /k "python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir backend"
+)
 
 REM Wait for backend to start
 timeout /t 3 /nobreak >nul
 
 echo [4/4] Starting Frontend Server...
-start "AI Sales Copilot - Frontend" cmd /k "cd frontend && npm run dev"
+netstat -aon | findstr "LISTENING" | findstr ":5173" >nul
+if not errorlevel 1 (
+    echo Frontend is already running on port 5173. Skipping duplicate process.
+) else (
+    start "AI Sales Copilot - Frontend" cmd /k "cd frontend && npm run dev"
+)
 
 echo.
 echo ========================================
