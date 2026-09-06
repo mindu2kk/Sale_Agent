@@ -84,6 +84,7 @@ def route_intent(user_query: str, state: AgentState | None = None) -> IntentRout
     state = state or AgentState()
     normalized = normalize_text(user_query)
     base_constraints = extract_constraints(user_query)
+    explicit_category = base_constraints.get("category") is not None
     if (
         base_constraints.get("category") is None
         and base_constraints.get("use_case") is not None
@@ -92,6 +93,10 @@ def route_intent(user_query: str, state: AgentState | None = None) -> IntentRout
         base_constraints["category"] = state.active_category
     continuation = _is_query_continuation(normalized)
     refinement = _is_constraint_refinement(base_constraints, state)
+    if explicit_category and _has_explicit_search_filters(base_constraints):
+        # A self-contained category query starts a new search. It must not
+        # silently retain narrower hardware filters from an earlier turn.
+        refinement = False
     constraints = (
         _inherit_constraints(base_constraints, state)
         if continuation or refinement
@@ -438,6 +443,26 @@ def _is_constraint_refinement(
         return False
 
     return True
+
+
+def _has_explicit_search_filters(constraints: dict[str, object]) -> bool:
+    """Return whether a category query includes its own narrowing filters."""
+
+    return any(
+        constraints.get(key) is not None
+        for key in (
+            "brand",
+            "min_price",
+            "max_price",
+            "target_price",
+            "cpu_tier",
+            "gpu_type",
+            "ram_gb",
+            "storage_gb",
+            "screen_inches",
+            "use_case",
+        )
+    )
 
 
 def _is_brand_scoped_reference(

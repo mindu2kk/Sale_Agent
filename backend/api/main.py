@@ -1001,7 +1001,11 @@ def _try_contract_first_response(
     elif route.intent == "focused_product_field_question":
         resolution = resolve_agent_product_reference(request.message, agent_state)
         product_resolution = _resolution_to_dict(resolution)
-        code = resolution.code or agent_state.focused_product_code
+        code = (
+            resolution.code
+            or state.active_product_code
+            or agent_state.focused_product_code
+        )
         product = catalog.get(code or "") if code else None
         if product is None:
             return None
@@ -1088,7 +1092,7 @@ def _try_contract_first_response(
         query_frame=frame,
         response=advisor_response,
         products=facts,
-        focused_product_code=agent_state.focused_product_code,
+        focused_product_code=focused_code_for_verifier or agent_state.focused_product_code,
         exclude_codes=exclude_codes,
     )
     if not verifier_result.passed or not contract_result.passed:
@@ -1104,7 +1108,19 @@ def _try_contract_first_response(
         route=route,
         frame=frame,
         shown_products=products if serialized_products else [],
-        focused_product=products[0] if len(products) == 1 else None,
+        focused_product=(
+            products[0]
+            if products
+            and route.intent
+            in {
+                "new_filtered_search",
+                "query_continuation",
+                "focused_product_field_question",
+                "product_selection",
+                "product_detail",
+            }
+            else None
+        ),
         catalog_revision=_catalog_revision(catalog),
     )
     verification = {

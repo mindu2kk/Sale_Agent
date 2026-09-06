@@ -1,7 +1,7 @@
 # AI Sales Copilot - Makefile
 # Quick commands for common tasks
 
-.PHONY: help start stop install test clean docker-up docker-down docker-logs
+.PHONY: help start stop install test test-full clean docker-up docker-down docker-logs
 
 # Default target
 help:
@@ -20,7 +20,8 @@ help:
 	@echo "  make install-js   - Install Node.js dependencies"
 	@echo ""
 	@echo "Testing:"
-	@echo "  make test         - Run all tests"
+	@echo "  make test         - Run push-ready smoke/regression tests"
+	@echo "  make test-full    - Run full pytest suite"
 	@echo "  make test-unit    - Run unit tests"
 	@echo "  make test-cov     - Run tests with coverage"
 	@echo ""
@@ -59,8 +60,12 @@ install-js:
 
 # Testing
 test:
-	@echo "Running all tests..."
-	pytest
+	@echo "Running push-ready smoke/regression tests..."
+	python -m pytest tests/test_harness_runtime.py tests/test_agent_verifier.py tests/test_query_frame_display_specs.py tests/test_product_reference_resolution.py tests/test_api_contract_runtime.py tests/test_harness_preflight.py tests/test_harness_postflight.py tests/agent tests/verification/test_config_loader.py tests/test_unit.py -q
+
+test-full:
+	@echo "Running full pytest suite..."
+	python -m pytest -q
 
 test-unit:
 	@echo "Running unit tests..."
@@ -123,7 +128,7 @@ health:
 	@echo "Checking system health..."
 	@curl -s http://localhost:8000/health | python -m json.tool
 	@echo ""
-	@curl -s http://localhost:8000/health/chat | python -m json.tool
+	@curl -s http://localhost:8000/metrics | python -m json.tool
 
 # Logs
 logs-backend:

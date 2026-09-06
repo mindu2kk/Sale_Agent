@@ -28,7 +28,12 @@ def build_query_frame(route: IntentRoute, state: AgentState | None = None) -> Qu
     if not isinstance(requested_attributes, tuple):
         requested_attributes = ()
 
-    if inherits_previous_frame(route) and state and state.query_frame:
+    if (
+        inherits_previous_frame(route)
+        and route.field_requested is None
+        and state
+        and state.query_frame
+    ):
         requested_attributes = tuple(
             dict.fromkeys((*state.query_frame.requested_attributes, *requested_attributes))
         )
