@@ -1396,6 +1396,7 @@ def _commit_contract_state(
             or (
                 route.has_new_constraints
                 and route.constraints.get("exclude_previous") is not True
+                and route.constraints.get("inherits_previous") is not True
             )
         )
         else previous
@@ -1407,12 +1408,12 @@ def _commit_contract_state(
     )
     candidate_codes = [product.code for product in shown_products] or previous.candidate_codes
     compared_codes = (
-        candidate_codes[:2]
+        candidate_codes[:8]
         if route.intent == "comparison" and len(candidate_codes) >= 2
         else []
     )
     compared_brands = (
-        list(dict.fromkeys(product.brand for product in shown_products[:2]))
+        list(dict.fromkeys(product.brand for product in shown_products))[:4]
         if compared_codes
         else []
     )

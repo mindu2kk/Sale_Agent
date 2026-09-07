@@ -7,7 +7,9 @@ from backend.agent.state import AgentState, CandidateRef, ProductConstraints, Qu
 from backend.agent.verifier import AdvisorResponseContract, verify_response
 from backend.agent.evidence import build_evidence_ledger
 from backend.agent.product_facts import normalize_product
+from backend.api.main import _commit_contract_state
 from backend.services.catalog import CatalogProduct
+from backend.services.conversation import DecisionContext
 
 
 def _product(code: str, name: str, brand: str, specs: tuple[str, ...]) -> CatalogProduct:
@@ -110,6 +112,68 @@ def test_brand_refinement_inherits_previous_dedicated_gpu_constraint() -> None:
     assert frame.constraints.max_price == 30_000_000
     assert frame.constraints.gpu_type == "dedicated"
     assert "gpu_type" in frame.requested_attributes
+
+
+def test_macbook_brand_refinement_keeps_saved_target_budget() -> None:
+    state = AgentState(
+        active_category="Laptop",
+        budget_target=20_000_000,
+        query_frame=QueryFrame(
+            intent="new_filtered_search",
+            constraints=ProductConstraints(category="Laptop"),
+        ),
+    )
+
+    route = route_intent("Có MacBook trong tầm giá không?", state)
+
+    assert route.intent == "new_filtered_search"
+    assert route.constraints["inherits_previous"] is True
+    assert route.constraints["category"] == "Laptop"
+    assert route.constraints["brand"] == "Apple"
+    assert route.constraints["target_price"] == 20_000_000
+
+
+def test_legacy_state_without_query_frame_keeps_saved_budget_on_refinement() -> None:
+    state = AgentState(active_category="Laptop", budget_target=20_000_000)
+
+    route = route_intent("Tôi không chơi game, chỉ làm văn phòng", state)
+
+    assert route.intent == "new_filtered_search"
+    assert route.constraints["inherits_previous"] is True
+    assert route.constraints["category"] == "Laptop"
+    assert route.constraints["target_price"] == 20_000_000
+    assert route.constraints["use_case"] == "office"
+
+
+def test_contract_state_advances_budget_after_mixed_refinement() -> None:
+    """An explicit budget update becomes the baseline for later follow-ups."""
+
+    def commit_turn(previous: DecisionContext, query: str) -> DecisionContext:
+        state = AgentState.from_decision_context(previous)
+        route = route_intent(query, state)
+        frame = build_query_frame(route, state)
+        return _commit_contract_state(
+            previous=previous,
+            route=route,
+            frame=frame,
+            shown_products=[DELL_I5, DELL_I7],
+            focused_product=None,
+            catalog_revision="test-catalog",
+        )
+
+    initial = commit_turn(DecisionContext(), "Tư vấn laptop Dell tầm 20 triệu")
+    inherited = commit_turn(initial, "Tôi chỉ làm văn phòng")
+    updated = commit_turn(inherited, "Tôi cần tầm 25 triệu")
+    later_inherited = commit_turn(updated, "Có màn hình 15 inch không?")
+
+    assert initial.budget_target == 20_000_000
+    assert inherited.budget_target == 20_000_000
+    assert updated.budget_target == 25_000_000
+    assert updated.last_query_frame["constraints"]["brand"] == "Dell"
+    assert updated.last_query_frame["constraints"]["use_case"] == "office"
+    assert later_inherited.budget_target == 25_000_000
+    assert later_inherited.last_query_frame["constraints"]["brand"] == "Dell"
+    assert later_inherited.last_query_frame["constraints"]["screen_inches"] == 15.0
 
 
 def test_use_case_refinement_inherits_previous_gpu_and_category() -> None:

@@ -93,7 +93,6 @@ def route_intent(user_query: str, state: AgentState | None = None) -> IntentRout
     state = state or AgentState()
     normalized = normalize_text(user_query)
     base_constraints = extract_constraints(user_query)
-    explicit_category = base_constraints.get("category") is not None
     if (
         base_constraints.get("category") is None
         and base_constraints.get("use_case") is not None
@@ -102,10 +101,6 @@ def route_intent(user_query: str, state: AgentState | None = None) -> IntentRout
         base_constraints["category"] = state.active_category
     continuation = _is_query_continuation(normalized)
     refinement = _is_constraint_refinement(base_constraints, state)
-    if explicit_category and _has_explicit_search_filters(base_constraints):
-        # A self-contained category query starts a new search. It must not
-        # silently retain narrower hardware filters from an earlier turn.
-        refinement = False
     constraints = (
         _inherit_constraints(base_constraints, state)
         if continuation or refinement
@@ -374,7 +369,16 @@ def _inherit_constraints(
     frame = state.query_frame
     previous = frame.constraints if frame else state.last_constraints
     if previous is None:
-        return constraints
+        if state.budget_target is None:
+            return constraints
+        inherited = dict(constraints)
+        if (
+            inherited.get("min_price") is None
+            and inherited.get("max_price") is None
+            and inherited.get("target_price") is None
+        ):
+            inherited["target_price"] = state.budget_target
+        return inherited
     inherited = dict(constraints)
     for key in (
         "category",
@@ -390,6 +394,13 @@ def _inherit_constraints(
     ):
         if inherited.get(key) is None:
             inherited[key] = getattr(previous, key)
+    if (
+        inherited.get("min_price") is None
+        and inherited.get("max_price") is None
+        and inherited.get("target_price") is None
+        and state.budget_target is not None
+    ):
+        inherited["target_price"] = state.budget_target
     if not inherited.get("requested_attributes") and frame is not None:
         inherited["requested_attributes"] = frame.requested_attributes
     return inherited
@@ -403,12 +414,15 @@ def _is_constraint_refinement(
 
     frame = state.query_frame
     previous = frame.constraints if frame else state.last_constraints
-    if previous is None:
-        return False
-    if getattr(previous, "category", None) is None and state.active_category is None:
+    previous_category = (
+        getattr(previous, "category", None)
+        if previous is not None
+        else state.active_category
+    )
+    if previous_category is None:
         return False
 
-    has_previous_filter = any(
+    has_previous_filter = previous is None or any(
         getattr(previous, key) is not None
         for key in (
             "category",
@@ -443,7 +457,6 @@ def _is_constraint_refinement(
         return False
 
     current_category = constraints.get("category")
-    previous_category = getattr(previous, "category", None) or state.active_category
     if (
         current_category is not None
         and previous_category is not None
@@ -452,26 +465,6 @@ def _is_constraint_refinement(
         return False
 
     return True
-
-
-def _has_explicit_search_filters(constraints: dict[str, object]) -> bool:
-    """Return whether a category query includes its own narrowing filters."""
-
-    return any(
-        constraints.get(key) is not None
-        for key in (
-            "brand",
-            "min_price",
-            "max_price",
-            "target_price",
-            "cpu_tier",
-            "gpu_type",
-            "ram_gb",
-            "storage_gb",
-            "screen_inches",
-            "use_case",
-        )
-    )
 
 
 def _is_brand_scoped_reference(

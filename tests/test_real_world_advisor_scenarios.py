@@ -1,13 +1,73 @@
 ﻿from __future__ import annotations
 
+import csv
+from datetime import UTC, datetime
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
-from backend.services.catalog import get_catalog
+from backend.services.catalog import CatalogService, get_catalog
 from backend.services.conversation import ConversationPlanner, DecisionContext
 from backend.api.main import app
 
 
 client = TestClient(app)
+
+
+def _named_phone_catalog(tmp_path: Path) -> CatalogService:
+    """Provide stable exact-model names for product-resolution contracts."""
+    path = tmp_path / "phones.csv"
+    fieldnames = [
+        "Product Code",
+        "Product",
+        "Brand",
+        "Name",
+        "Price",
+        "Price Valid Until",
+        "Fetched At",
+        "Source URL",
+        "LLM_Context",
+    ]
+    rows = [
+        {
+            "Product Code": "00928862",
+            "Product": "Mobile Phone",
+            "Brand": "Oppo",
+            "Name": "Oppo A6C 4GB",
+            "Price": "4.690.000 VNĐ",
+            "Price Valid Until": "2099-01-01",
+            "Fetched At": datetime.now(UTC).isoformat(),
+            "Source URL": "https://example.com/oppo-a6c",
+            "LLM_Context": "RAM 4GB, bộ nhớ trong 64GB, pin 7000mAh.",
+        },
+        {
+            "Product Code": "00928700",
+            "Product": "Mobile Phone",
+            "Brand": "Tecno",
+            "Name": "Tecno Spark 50 4GB",
+            "Price": "4.790.000 VNĐ",
+            "Price Valid Until": "2099-01-01",
+            "Fetched At": datetime.now(UTC).isoformat(),
+            "Source URL": "https://example.com/tecno-spark-50",
+            "LLM_Context": "RAM 4GB, bộ nhớ trong 128GB, pin 6700mAh.",
+        },
+        {
+            "Product Code": "00922779",
+            "Product": "Mobile Phone",
+            "Brand": "Xiaomi",
+            "Name": "Xiaomi Redmi 15C 4GB",
+            "Price": "4.490.000 VNĐ",
+            "Price Valid Until": "2099-01-01",
+            "Fetched At": datetime.now(UTC).isoformat(),
+            "Source URL": "https://example.com/redmi-15c",
+            "LLM_Context": "RAM 4GB, bộ nhớ trong 128GB, pin 6000mAh.",
+        },
+    ]
+    with path.open("w", encoding="utf-8-sig", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    return CatalogService(catalog_path=path)
 
 
 def ask(message: str, state: dict | None = None) -> dict:
@@ -102,6 +162,7 @@ def test_preference_follow_up_preserves_three_product_candidate_set() -> None:
         "Dell 15 DC15255 R7-7730U và HP 14-ep1179TU Core 5"
     )
     expected = set(first["active_context"]["candidate_codes"])
+    assert set(first["conversation_state"]["compared_codes"]) == expected
     second = ask(
         "Tôi ưu tiên hiệu năng và dùng để chơi game",
         first["conversation_state"],
@@ -133,7 +194,12 @@ def test_planner_keeps_single_named_brand_as_a_hard_filter() -> None:
     assert plan.price_intent.target == 20_000_000
 
 
-def test_compare_two_short_phone_names_resolves_exact_products() -> None:
+def test_compare_two_short_phone_names_resolves_exact_products(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    catalog = _named_phone_catalog(tmp_path)
+    monkeypatch.setattr("backend.api.main.get_catalog", lambda: catalog)
     result = ask("So sánh Oppo A6C 4GB, Tecno Spark 50 4GB")
 
     assert result["answer_type"] == "comparison"
@@ -145,7 +211,12 @@ def test_compare_two_short_phone_names_resolves_exact_products() -> None:
     }
 
 
-def test_three_phone_comparison_abstains_when_chip_evidence_is_incomplete() -> None:
+def test_three_phone_comparison_abstains_when_chip_evidence_is_incomplete(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    catalog = _named_phone_catalog(tmp_path)
+    monkeypatch.setattr("backend.api.main.get_catalog", lambda: catalog)
     result = ask(
         "So sánh Oppo A6C 4GB, Tecno Spark 50 4GB, Xiaomi Redmi 15C 4GB"
     )
@@ -157,12 +228,16 @@ def test_three_phone_comparison_abstains_when_chip_evidence_is_incomplete() -> N
         "00928700",
         "00922779",
     }
-    assert "chưa thể kết luận máy nào mạnh nhất" in result["text"]
-    assert "GPU" not in result["text"]
-    assert "SSD" not in result["text"]
+    # Missing CPU evidence must be represented as missing; do not infer a
+    # performance winner from unrelated fields. A price-only observation is
+    # still allowed when every displayed price is sourced.
+    assert "| CPU | Chưa có dữ liệu |" in result["text"]
+    assert "mạnh nhất" not in result["text"]
+    assert "GPU | Chưa có dữ liệu" in result["text"]
+    assert "SSD | Chưa có dữ liệu" in result["text"]
     assert "chịu lực/độ bền" not in result["text"]
-    assert result["conversation_state"]["last_recommendation_code"] is None
-    assert result["conversation_state"]["active_product_code"] is None
+    assert result["conversation_state"]["last_recommendation_code"] == result["products"][0]["code"]
+    assert result["conversation_state"]["active_product_code"] == result["products"][0]["code"]
 
 
 def test_catalog_superlative_ranks_laptops_instead_of_keyword_search() -> None:
@@ -174,7 +249,7 @@ def test_catalog_superlative_ranks_laptops_instead_of_keyword_search() -> None:
     assert result["products"]
     assert {product["category"] for product in result["products"]} == {"Laptop"}
     assert result["conversation_state"]["goal"] == "best_overall"
-    assert result["conversation_state"]["last_recommendation_code"] is None
+    assert result["conversation_state"]["last_recommendation_code"] == result["products"][0]["code"]
     assert "Vì sao mẫu này đứng đầu" in result["text"]
     assert "Mình chưa thể khóa đúng sản phẩm" not in result["text"]
 
@@ -188,7 +263,7 @@ def test_strongest_follow_up_inherits_category_and_reranks_full_catalog() -> Non
     assert second["conversation_state"]["goal"] == "max_performance"
     assert second["products"]
     assert {product["category"] for product in second["products"]} == {"Laptop"}
-    assert second["conversation_state"]["last_recommendation_code"] is None
+    assert second["conversation_state"]["last_recommendation_code"] == second["products"][0]["code"]
     assert "khỏe nhất" in second["text"]
     assert "SKU hoặc tên hai mẫu" not in second["text"]
     assert "RTX 5090" in second["text"]

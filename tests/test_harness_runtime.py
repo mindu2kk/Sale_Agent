@@ -1,10 +1,12 @@
 ﻿from __future__ import annotations
 
+import csv
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from backend.services.catalog import CatalogProduct
+from backend.services.catalog import CatalogProduct, CatalogService
 from backend.services.conversation import ConversationPlanner, DecisionContext
 from backend.harness.runtime import (
     BeliefState,
@@ -38,6 +40,30 @@ def product(
         fetched_at=datetime.now(UTC).isoformat(),
         price_valid_until=valid_until,
     )
+
+
+def _catalog_from_rows(
+    tmp_path: Path,
+    rows: list[dict[str, str]],
+) -> CatalogService:
+    """Create catalog evidence whose freshness is controlled by the test."""
+    path = tmp_path / "catalog.csv"
+    fieldnames = [
+        "Product Code",
+        "Product",
+        "Brand",
+        "Name",
+        "Price",
+        "Price Valid Until",
+        "Fetched At",
+        "Source URL",
+        "LLM_Context",
+    ]
+    with path.open("w", encoding="utf-8-sig", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    return CatalogService(catalog_path=path)
 
 
 def test_belief_state_keeps_decision_state_not_raw_history() -> None:
@@ -91,8 +117,38 @@ def test_budget_reports_candidate_and_latency_constraints() -> None:
 
 def test_api_exposes_complete_harness_trajectory_in_development(
     monkeypatch,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.setenv("EXPOSE_DECISION_TRACE", "true")
+    yesterday = (datetime.now(UTC).date() - timedelta(days=1)).isoformat()
+    catalog = _catalog_from_rows(
+        tmp_path,
+        [
+            {
+                "Product Code": "00928862",
+                "Product": "Mobile Phone",
+                "Brand": "Oppo",
+                "Name": "Oppo A6C 4GB",
+                "Price": "4.690.000 VNĐ",
+                "Price Valid Until": yesterday,
+                "Fetched At": datetime.now(UTC).isoformat(),
+                "Source URL": "https://example.com/oppo-a6c",
+                "LLM_Context": "RAM 4GB, pin 7000mAh.",
+            },
+            {
+                "Product Code": "00928700",
+                "Product": "Mobile Phone",
+                "Brand": "Tecno",
+                "Name": "Tecno Spark 50 4GB",
+                "Price": "4.790.000 VNĐ",
+                "Price Valid Until": yesterday,
+                "Fetched At": datetime.now(UTC).isoformat(),
+                "Source URL": "https://example.com/tecno-spark-50",
+                "LLM_Context": "RAM 4GB, pin 6700mAh.",
+            },
+        ],
+    )
+    monkeypatch.setattr("backend.api.main.get_catalog", lambda: catalog)
     payload = TestClient(app).post(
         "/api/chat",
         json={
@@ -123,8 +179,27 @@ def test_api_exposes_complete_harness_trajectory_in_development(
 
 def test_api_safely_degrades_when_catalog_evidence_is_stale(
     monkeypatch,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.setenv("EXPOSE_DECISION_TRACE", "true")
+    yesterday = (datetime.now(UTC).date() - timedelta(days=1)).isoformat()
+    catalog = _catalog_from_rows(
+        tmp_path,
+        [
+            {
+                "Product Code": "00928595",
+                "Product": "Mobile Phone",
+                "Brand": "Oppo",
+                "Name": "Oppo Test",
+                "Price": "4.690.000 VNĐ",
+                "Price Valid Until": yesterday,
+                "Fetched At": datetime.now(UTC).isoformat(),
+                "Source URL": "https://example.com/oppo-test",
+                "LLM_Context": "RAM 4GB, pin 7000mAh.",
+            },
+        ],
+    )
+    monkeypatch.setattr("backend.api.main.get_catalog", lambda: catalog)
     payload = TestClient(app).post(
         "/api/chat",
         json={

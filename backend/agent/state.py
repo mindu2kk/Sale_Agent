@@ -92,6 +92,10 @@ class QueryFrame:
 class AgentState:
     conversation_id: str = ""
     active_category: str | None = None
+    # DecisionContext keeps target-price intent separately from QueryFrame,
+    # whose public constraints only model min/max price bounds.  Preserve it
+    # here so a brand/use-case follow-up can retain an explicit budget.
+    budget_target: int | None = None
     focused_product_code: str | None = None
     focused_product_name: str | None = None
     last_shown_candidates: list[CandidateRef] = field(default_factory=list)
@@ -166,6 +170,7 @@ class AgentState:
         return cls(
             active_category=getattr(context, "category", None)
             or getattr(context, "last_category", None),
+            budget_target=getattr(context, "budget_target", None),
             focused_product_code=getattr(context, "focused_product_code", None),
             focused_product_name=getattr(context, "focused_product_name", None),
             last_shown_candidates=candidates,

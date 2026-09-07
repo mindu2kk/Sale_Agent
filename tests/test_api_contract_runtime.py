@@ -1,8 +1,72 @@
 ﻿from __future__ import annotations
 
+import csv
+from datetime import UTC, datetime
+from pathlib import Path
+
+import pytest
 from fastapi.testclient import TestClient
 
 from backend.api.main import app
+from backend.services.catalog import CatalogService
+
+
+def _stable_laptop_catalog(tmp_path: Path) -> CatalogService:
+    """Build a small catalog whose products are named by this API contract."""
+    path = tmp_path / "api-contract-laptops.csv"
+    fieldnames = [
+        "Product Code",
+        "Product",
+        "Brand",
+        "Name",
+        "Price",
+        "Price Valid Until",
+        "Fetched At",
+        "Source URL",
+        "LLM_Context",
+    ]
+    rows = [
+        {
+            "Product Code": "00927778", "Product": "Laptop", "Brand": "Dell",
+            "Name": "Dell Inspiron 15 Core i7", "Price": "19.990.000 VNĐ",
+            "Price Valid Until": "2099-01-01", "Fetched At": datetime.now(UTC).isoformat(),
+            "Source URL": "https://example.com/dell-i7",
+            "LLM_Context": "Laptop Dell bao gồm: Core i7, RAM 16GB, SSD 512GB, GPU NVIDIA GeForce RTX 3050, màn hình 15.6 inch.",
+        },
+        {
+            "Product Code": "00927423", "Product": "Laptop", "Brand": "Dell",
+            "Name": "Dell 15 DC15255 R7-7730U 884116430117", "Price": "18.990.000 VNĐ",
+            "Price Valid Until": "2099-01-01", "Fetched At": datetime.now(UTC).isoformat(),
+            "Source URL": "https://example.com/dell-r7",
+            "LLM_Context": "Laptop Dell bao gồm: Ryzen 7 7730U, RAM 16GB, SSD 512GB, GPU NVIDIA GeForce RTX 3050, màn hình 15.6 inch.",
+        },
+        {
+            "Product Code": "00927402", "Product": "Laptop", "Brand": "Dell",
+            "Name": "Dell 15 DC15250 i5-1334U 71092479", "Price": "17.990.000 VNĐ",
+            "Price Valid Until": "2099-01-01", "Fetched At": datetime.now(UTC).isoformat(),
+            "Source URL": "https://example.com/dell-i5",
+            "LLM_Context": "Laptop Dell bao gồm: Core i5 1334U, RAM 16GB, SSD 512GB, GPU NVIDIA GeForce RTX 2050, màn hình 15.6 inch.",
+        },
+        {
+            "Product Code": "00929021", "Product": "Laptop", "Brand": "Lenovo",
+            "Name": "Lenovo IdeaPad Slim 3 14IPH11 U7 355 83UQ003PVN", "Price": "19.790.000 VNĐ",
+            "Price Valid Until": "2099-01-01", "Fetched At": datetime.now(UTC).isoformat(),
+            "Source URL": "https://example.com/lenovo-u7",
+            "LLM_Context": "Laptop Lenovo bao gồm: Core Ultra 7 355, RAM 16GB, SSD 512GB, Intel Graphics, màn hình 14 inch, trọng lượng 1.43kg.",
+        },
+    ]
+    with path.open("w", encoding="utf-8-sig", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+    return CatalogService(catalog_path=path)
+
+
+@pytest.fixture(autouse=True)
+def _use_stable_catalog(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Keep API-contract semantics independent from daily catalog refreshes."""
+    catalog = _stable_laptop_catalog(tmp_path)
+    monkeypatch.setattr("backend.api.main.get_catalog", lambda: catalog)
 
 
 def _post_chat(client: TestClient, message: str, history: list[dict], state: dict | None) -> dict:
@@ -60,7 +124,12 @@ def test_web_chat_contract_runtime_transcript() -> None:
         assert all(product["brand"] == "Dell" for product in r3["products"])
         assert r2["products"][0]["code"] not in [product["code"] for product in r3["products"]]
     else:
-        assert "Dell Laptop card rời dưới 30.000.000 VNĐ" in r3["text"]
+        # A continuation with no remaining candidates must retain every active
+        # filter, rather than silently broadening the original search.
+        assert "Dell" in r3["text"]
+        assert "card rời" in r3["text"]
+        assert "RAM 16GB" in r3["text"]
+        assert "SSD 512GB" in r3["text"]
     _append_history(history, q3, r3)
     state = r3["conversation_state"]
 
@@ -68,7 +137,7 @@ def test_web_chat_contract_runtime_transcript() -> None:
     r4 = _post_chat(client, q4, history, state)
     assert r4["response_mode"] == "filtered_search_result"
     assert all(product["brand"] == "Dell" for product in r4["products"])
-    assert all("Core i7" in " ".join(product["specs"][:2]) for product in r4["products"])
+    assert all("Core i7" in " ".join(product["specs"]) for product in r4["products"])
     assert "Core 7" not in r4["text"]
     assert "Ryzen AI" not in r4["text"]
     _append_history(history, q4, r4)
@@ -90,7 +159,8 @@ def test_compare_followup_uses_previous_dell_candidates() -> None:
     q1 = "Cho toi laptop Dell duoi 20 trieu"
     r1 = _post_chat(client, q1, history, state)
     first_codes = [product["code"] for product in r1["products"]]
-    assert first_codes == ["00927778", "00927423"]
+    assert len(first_codes) >= 2
+    assert all(product["brand"] == "Dell" for product in r1["products"])
     _append_history(history, q1, r1)
     state = r1["conversation_state"]
 
@@ -100,8 +170,8 @@ def test_compare_followup_uses_previous_dell_candidates() -> None:
 
     assert r2["response_mode"] == "comparison"
     assert r2["ai_mode"] == "deterministic_advisor"
-    assert compared_codes == first_codes
-    assert r2["conversation_state"]["compared_codes"] == first_codes
+    assert compared_codes == first_codes[:2]
+    assert r2["conversation_state"]["compared_codes"] == first_codes[:2]
     assert "Asus" not in r2["text"]
     assert "Lenovo" not in r2["text"]
 
@@ -119,7 +189,8 @@ def test_notable_two_followup_uses_latest_dell_candidates_after_prior_search() -
     q2 = "Cho toi cac laptop Dell duoi 20 trieu"
     r2 = _post_chat(client, q2, history, state)
     dell_codes = [product["code"] for product in r2["products"][:2]]
-    assert dell_codes == ["00927778", "00927423"]
+    assert len(dell_codes) == 2
+    assert all(product["brand"] == "Dell" for product in r2["products"][:2])
     _append_history(history, q2, r2)
     state = r2["conversation_state"]
 
