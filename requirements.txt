@@ -30,6 +30,13 @@ aiohttp>=3.8.0
 llama-index>=0.9.0
 llama-index-llms-openai
 llama-index-llms-anthropic
+# These integrations are imported directly by retrieval and ingestion code.
+llama-index-embeddings-huggingface>=0.6.0
+llama-index-vector-stores-chroma>=0.5.0
+llama-index-readers-file>=0.6.0
+# transformers currently requires this range; pin it to prevent a clean install
+# from resolving the incompatible 1.x client.
+huggingface-hub>=0.34.0,<1.0
 
 # Vector database for policy/product lookup
 chromadb>=0.4.0

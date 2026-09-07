@@ -83,6 +83,19 @@ def test_brand_search_respects_category_and_does_not_mix_iphone_with_macbook() -
     assert {product["category"] for product in result["products"]} == {"Laptop"}
 
 
+def test_phone_brand_constraints_are_hard_filters() -> None:
+    for message, brand, maximum in (
+        ("Điện thoại Samsung tầm 10 triệu chụp ảnh tốt", "Samsung", 10_000_000),
+        ("Có điện thoại Oppo dưới 5 triệu không?", "Oppo", 5_000_000),
+    ):
+        result = ask(message)
+
+        assert result["products"]
+        assert {product["brand"] for product in result["products"]} == {brand}
+        assert {product["category"] for product in result["products"]} == {"Mobile Phone"}
+        assert all(product["price_value"] <= maximum for product in result["products"])
+
+
 def test_preference_follow_up_preserves_three_product_candidate_set() -> None:
     first = ask(
         "So sánh MSI Gaming Thin 15 B13UC-3247VN, "

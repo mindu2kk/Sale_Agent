@@ -151,6 +151,27 @@ def test_new_explicit_sku_starts_a_clean_topic() -> None:
     assert detail["active_context"]["preferences"] == {}
 
 
+def test_explicit_sku_clears_preferences_from_prior_comparison() -> None:
+    client = TestClient(app)
+    comparison = _ask(client, "Nên chọn Dell hay Asus tầm 20 triệu?")
+    refined = _ask(
+        client,
+        "Ưu tiên độ bền bỉ, hiệu năng và chơi game.",
+        comparison["conversation_state"],
+    )
+    assert refined["active_context"]["preferences"]
+
+    detail = _ask(
+        client,
+        "Hãy tư vấn chi tiết sản phẩm mã 00928595.",
+        refined["conversation_state"],
+    )
+
+    assert detail["active_context"]["candidate_codes"] == ["00928595"]
+    assert detail["active_context"]["preferences"] == {}
+    assert detail["conversation_state"]["use_case"] is None
+
+
 def test_packet_verifier_ignores_eight_letter_product_words_but_rejects_unknown_sku() -> None:
     catalog = get_catalog()
     product = catalog.get("00927423")

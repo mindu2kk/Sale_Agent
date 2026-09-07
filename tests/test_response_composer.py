@@ -226,6 +226,21 @@ def test_comparison_response_includes_only_compared_products() -> None:
     assert any(action.type == "OFFER_COMPARE" for action in response.ui_actions)
 
 
+def test_comparison_response_keeps_three_explicit_products_in_the_table() -> None:
+    facts = _facts(DELL_I7, ACER, HP)
+    response = compose_response(
+        ResponseDraftInput(
+            response_mode="comparison",
+            products=facts,
+            evidence_ledger=build_evidence_ledger(list(facts)),
+        )
+    )
+
+    assert response.related_product_codes == (DELL_I7.code, ACER.code, HP.code)
+    assert all(product.name in response.answer_text for product in facts)
+    assert "| Tiêu chí |" in response.answer_text
+
+
 def test_correction_response_locks_corrected_product_focus() -> None:
     facts = _facts(HP)
     response = compose_response(

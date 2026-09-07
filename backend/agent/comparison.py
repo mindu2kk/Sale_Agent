@@ -25,25 +25,30 @@ class ComparisonResult:
 
 
 def build_comparison(products: tuple[NormalizedProductFacts, ...]) -> ComparisonResult:
-    selected = products[:2]
+    selected = products[:4]
     if len(selected) < 2:
         return ComparisonResult("", "Mình cần ít nhất 2 mẫu đã xác định để so sánh.")
-    a, b = selected
     lines = [
-        f"| Tiêu chí | {_product_label(a)} | {_product_label(b)} |",
-        "|---|---|---|",
+        "| Tiêu chí | " + " | ".join(_product_label(product) for product in selected) + " |",
+        "|---|" + "|".join("---" for _ in selected) + "|",
     ]
     for field, label in COMPARISON_FIELDS:
-        lines.append(f"| {label} | {_value(a, field)} | {_value(b, field)} |")
+        lines.append(
+            f"| {label} | "
+            + " | ".join(_value(product, field) for product in selected)
+            + " |"
+        )
 
     conclusion_parts: list[str] = []
-    if a.price_value is not None and b.price_value is not None:
-        cheaper = a if a.price_value <= b.price_value else b
+    priced_products = [product for product in selected if product.price_value is not None]
+    if len(priced_products) == len(selected):
+        cheaper = min(priced_products, key=lambda product: product.price_value or 0)
         conclusion_parts.append(f"Nếu ưu tiên giá thấp, {cheaper.name} lợi hơn.")
-    if a.gpu_type != b.gpu_type:
-        gpu_pick = a if a.gpu_type == "dedicated" else b if b.gpu_type == "dedicated" else None
-        if gpu_pick:
-            conclusion_parts.append(f"Nếu cần GPU rời, {gpu_pick.name} đáng ưu tiên hơn.")
+    dedicated_gpu_products = [product for product in selected if product.gpu_type == "dedicated"]
+    if len(dedicated_gpu_products) == 1:
+        conclusion_parts.append(
+            f"Nếu cần GPU rời, {dedicated_gpu_products[0].name} đáng ưu tiên hơn."
+        )
     if not conclusion_parts:
         conclusion_parts.append("Nếu chỉ văn phòng/học tập, hãy chọn theo giá và kích thước màn hình bạn thích hơn.")
     return ComparisonResult("\n".join(lines), " ".join(conclusion_parts))

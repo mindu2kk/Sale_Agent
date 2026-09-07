@@ -37,7 +37,16 @@ class IntentRoute:
     is_correction: bool = False
 
 
-BRANDS = ("Dell", "HP", "Lenovo", "MSI", "Acer", "Asus", "Apple")
+# Keep this ordered list in sync with the supported catalog families.  The
+# contract route uses this parser before catalog search, so omitting a phone
+# brand here silently drops an explicit user constraint and produces a broad
+# category search instead.
+BRANDS = (
+    "Acer", "Apple", "Asus", "Benco", "Colorful", "Dell", "Gigabyte",
+    "HP", "Honor", "Inoi", "Itel", "LG", "Lenovo", "MSI", "Masstel",
+    "Mobell", "Nokia", "Nubia", "Oppo", "REDMAGIC", "Samsung", "TCL",
+    "Tecno", "Viettel", "Xiaomi",
+)
 CORRECTION_TERMS = ("co ma", "khong phai", "y toi la", "y minh la")
 PRONOUN_TERMS = ("may do", "con do", "mau do", "may nay", "con nay", "mau vua roi")
 DETAIL_TERMS = ("phan tich", "chi tiet", "noi ro", "noi ky", "noi ki", "cau hinh", "thong so")
