@@ -715,11 +715,7 @@ async def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
             user_query=request.message
         )
 
-        blocking_harness_issues = [
-            issue
-            for issue in harness_issues
-            if not issue.startswith("answer uses stale catalog evidence:")
-        ]
+        blocking_harness_issues = harness_issues
         blocking_governance_issues = [
             issue for issue in governance_issues if issue.severity in {"error", "critical"}
         ]

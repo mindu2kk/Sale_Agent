@@ -104,7 +104,7 @@ def test_api_exposes_complete_harness_trajectory_in_development(
     ).json()
     trace = payload["decision_trace"]["harness"]
     phases = [event["phase"] for event in trace["events"]]
-    assert trace["terminal_status"] == "approved"
+    assert trace["terminal_status"] == "blocked"
     assert phases[0] == "perception"
     assert "planning" in phases
     assert "retrieval" in phases
@@ -119,6 +119,26 @@ def test_api_exposes_complete_harness_trajectory_in_development(
     assert {
         item["product_code"] for item in trace["evidence"]
     } == {"00928862", "00928700"}
+
+
+def test_api_safely_degrades_when_catalog_evidence_is_stale(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("EXPOSE_DECISION_TRACE", "true")
+    payload = TestClient(app).post(
+        "/api/chat",
+        json={
+            "message": "Tư vấn chi tiết mã 00928595",
+            "history": [],
+            "conversation_state": None,
+        },
+        headers={"x-eval-mode": "harness"},
+    ).json()
+
+    events = payload["decision_trace"]["harness"]["events"]
+    assert payload["answer_type"] == "safe_degrade"
+    assert payload["ai_mode"] == "safe_degraded"
+    assert any(event["phase"] == "recovery" for event in events)
 
 
 def test_metrics_include_harness_run_profile(monkeypatch) -> None:
