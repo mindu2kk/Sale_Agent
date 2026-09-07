@@ -1,5 +1,6 @@
 ﻿from datetime import UTC, datetime, timedelta
 
+import pytest
 from fastapi.testclient import TestClient
 
 from backend.services.conversation import ConversationPlanner, DecisionContext
@@ -236,13 +237,21 @@ def test_metrics_endpoint_exposes_agent_quality_counters() -> None:
     assert payload["agent"]["latency_p95_ms"] >= 0
 
 
-def test_rejected_recommendation_is_recorded_and_not_returned_again() -> None:
+@pytest.mark.parametrize(
+    "message",
+    (
+        "Không chọn mẫu này, đổi mẫu khác đi",
+        "Không lấy con này, tìm mẫu khác",
+        "Con Dell đó không phù hợp, tìm mẫu khác",
+    ),
+)
+def test_rejected_recommendation_is_recorded_and_not_returned_again(message: str) -> None:
     client = TestClient(app)
     first = _ask(client, "Tư vấn laptop tầm 20 triệu")
     rejected_code = first["products"][0]["code"]
     second = _ask(
         client,
-        "Không chọn mẫu này, đổi mẫu khác đi",
+        message,
         first["conversation_state"],
     )
 

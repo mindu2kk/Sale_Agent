@@ -44,6 +44,12 @@ def test_two_brand_question_routes_to_comparison() -> None:
     assert route.constraints["brands"] == ("Dell", "Acer")
 
 
+def test_brand_constraints_preserve_mention_order_and_deduplicate() -> None:
+    route = route_intent("so sánh Acer với Dell và Dell", _focused_state())
+
+    assert route.constraints["brands"] == ("Acer", "Dell")
+
+
 def test_correction_beats_new_constraints_but_preserves_constraints() -> None:
     route = route_intent("không phải con đó, Dell i7 cơ mà", _focused_state())
 

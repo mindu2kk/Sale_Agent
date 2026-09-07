@@ -261,11 +261,7 @@ def route_intent(user_query: str, state: AgentState | None = None) -> IntentRout
 def extract_constraints(user_query: str) -> dict[str, object]:
     normalized = normalize_text(user_query)
     price = _parse_price_intent(user_query)
-    brands = [brand for brand in BRANDS if _contains_phrase(normalized, normalize_text(brand))]
-    if _contains_phrase(normalized, "macbook") and "Apple" not in brands:
-        brands.append("Apple")
-    if _contains_phrase(normalized, "iphone") and "Apple" not in brands:
-        brands.append("Apple")
+    brands = _extract_brands_in_mention_order(normalized)
     cpu_filters = _detect_cpu_filters(user_query)
     gpu_filters = _detect_gpu_filters(user_query)
     constraints: dict[str, object] = {
@@ -284,6 +280,20 @@ def extract_constraints(user_query: str) -> dict[str, object]:
         "requested_attributes": extract_requested_attributes(user_query),
     }
     return constraints
+
+
+def _extract_brands_in_mention_order(normalized: str) -> list[str]:
+    """Return explicit brands in the order the customer mentioned them."""
+    positions: dict[str, int] = {}
+    for brand in BRANDS:
+        match = re.search(rf"\b{re.escape(normalize_text(brand))}\b", normalized)
+        if match is not None:
+            positions[brand] = match.start()
+    for alias in ("macbook", "iphone"):
+        match = re.search(rf"\b{alias}\b", normalized)
+        if match is not None:
+            positions["Apple"] = min(match.start(), positions.get("Apple", match.start()))
+    return [brand for brand, _ in sorted(positions.items(), key=lambda item: item[1])]
 
 
 def extract_field_question(user_query: str) -> str | None:

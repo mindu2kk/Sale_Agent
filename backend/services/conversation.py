@@ -351,6 +351,8 @@ class ConversationPlanner:
         "bo mau nay",
         "doi mau khac",
         "khong lay con nay",
+        "tim mau khac",
+        "khong phu hop",
     )
 
     def __init__(self, catalog: CatalogService) -> None:

@@ -15,6 +15,7 @@ from backend.agent.evidence import EvidenceLedger
 from backend.agent.next_best_question import next_best_question
 from backend.agent.product_facts import NormalizedProductFacts
 from backend.agent.recommendation_policy import advisory_tradeoff
+from backend.agent.spec_parser import normalize_text
 from backend.agent.state import ProductConstraints
 
 
@@ -279,6 +280,10 @@ def _compose_comparison(draft: ResponseDraftInput) -> AdvisorResponse:
         "",
         comparison.conclusion,
     ]
+    if _comparison_needs_evidence_disclaimer(draft):
+        lines.append(
+            "Mình không kết luận độ bền/pin khi catalog không có bằng chứng tương ứng."
+        )
     return _response(
         "\n".join(line for line in lines if line is not None),
         "comparison",
@@ -293,6 +298,22 @@ def _compose_comparison(draft: ResponseDraftInput) -> AdvisorResponse:
             ),
         ),
     )
+
+
+def _comparison_needs_evidence_disclaimer(draft: ResponseDraftInput) -> bool:
+    """Mention unavailable evidence only when it is relevant to this comparison.
+
+    Lower-level callers without a user query receive the conservative contract
+    disclaimer.  Customer-facing comparisons about price/specs should not add
+    an unsolicited durability or battery warning.
+    """
+    if not draft.user_query:
+        return True
+    requested = set(draft.requested_attributes)
+    if requested & {"battery_wh", "durability"}:
+        return True
+    normalized = normalize_text(draft.user_query)
+    return any(term in normalized for term in ("pin", "do ben", "ben bi", "ben khong"))
 
 
 def _compose_correction(draft: ResponseDraftInput, mode: str) -> AdvisorResponse:

@@ -882,6 +882,10 @@ def _try_contract_first_response(
         return None
     agent_state = ContractAgentState.from_decision_context(state)
     normalized_message = normalize_text(request.message)
+    # Stateful rejection handling records the code and excludes it from the
+    # next retrieval, so it must not be intercepted by detail resolution.
+    if any(term in normalized_message for term in ConversationPlanner.REJECTION_TERMS):
+        return None
     if "tai sao" in normalized_message and any(term in normalized_message for term in ("re hon", "dat hon", "gia")):
         return None
     if any(term in normalized_message for term in ("xin nhat", "cao cap nhat", "manh nhat", "khoe nhat", "tot nhat", "re nhat", "dat nhat")):
