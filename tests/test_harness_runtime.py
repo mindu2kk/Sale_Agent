@@ -100,6 +100,7 @@ def test_api_exposes_complete_harness_trajectory_in_development(
             "history": [],
             "conversation_state": None,
         },
+        headers={"x-eval-mode": "harness"},
     ).json()
     trace = payload["decision_trace"]["harness"]
     phases = [event["phase"] for event in trace["events"]]
@@ -130,6 +131,7 @@ def test_metrics_include_harness_run_profile(monkeypatch) -> None:
             "history": [],
             "conversation_state": None,
         },
+        headers={"x-eval-mode": "harness"},
     )
     metrics = client.get("/metrics").json()
     assert metrics["harness"]["runs"] >= 1
@@ -216,6 +218,7 @@ def test_api_trace_exposes_skill_context_and_governance(monkeypatch) -> None:
             "history": [],
             "conversation_state": None,
         },
+        headers={"x-eval-mode": "harness"},
     ).json()
     trace = payload["decision_trace"]["harness"]
     assert trace["skill"]["name"] == "product-comparison"

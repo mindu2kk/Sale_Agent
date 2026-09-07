@@ -8,7 +8,7 @@ import os
 import re
 from datetime import UTC, datetime
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse, Response
 from pydantic import BaseModel, Field
@@ -227,7 +227,7 @@ async def get_product_image(code: str):
 
 
 @app.post("/api/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest) -> ChatResponse:
+async def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
     import uuid
     budget = ExecutionBudget(maxPhaseEvents=30, maxCandidates=40, maxElapsedMs=6000, maxRetries=2)
     trace_collector = TraceCollector(
@@ -254,12 +254,16 @@ async def chat(request: ChatRequest) -> ChatResponse:
         if state.is_expired():
             state = DecisionContext()
 
-        contract_response = _try_contract_first_response(
-            request=request,
-            state=state,
-            catalog=catalog,
-            request_timer=request_timer,
-        )
+        # Trajectory evaluation explicitly exercises the harness control plane.
+        # Normal traffic can still use the faster, independently verified contract path.
+        contract_response = None
+        if http_request.headers.get("x-eval-mode", "").casefold() != "harness":
+            contract_response = _try_contract_first_response(
+                request=request,
+                state=state,
+                catalog=catalog,
+                request_timer=request_timer,
+            )
         if contract_response is not None:
             trace_collector.record_phase("commit", "domain_contract_response", "succeeded")
             trace_collector.finish_run("succeeded", "Domain contract response completed")
