@@ -2,7 +2,7 @@
 
 from fastapi.testclient import TestClient
 
-from backend.services.catalog import get_catalog
+from backend.services.catalog import CatalogService, get_catalog
 from backend.services.conversation import CandidateRef, DecisionContext
 from backend.api.main import app, _catalog_revision
 
@@ -10,8 +10,8 @@ from backend.api.main import app, _catalog_revision
 client = TestClient(app)
 
 
-def _candidate_ref(code: str) -> CandidateRef:
-    catalog = get_catalog()
+def _candidate_ref(code: str, catalog=None) -> CandidateRef:
+    catalog = catalog or get_catalog()
     product = catalog.get(code)
     assert product is not None
     return CandidateRef(
@@ -24,8 +24,8 @@ def _candidate_ref(code: str) -> CandidateRef:
     )
 
 
-def _state_for_focus(code: str) -> DecisionContext:
-    catalog = get_catalog()
+def _state_for_focus(code: str, catalog=None) -> DecisionContext:
+    catalog = catalog or get_catalog()
     product = catalog.get(code)
     assert product is not None
     return DecisionContext(
@@ -34,7 +34,7 @@ def _state_for_focus(code: str) -> DecisionContext:
         focused_product_code=product.code,
         focused_product_name=product.name,
         candidate_codes=[product.code],
-        last_shown_candidates=[_candidate_ref(product.code)],
+        last_shown_candidates=[_candidate_ref(product.code, catalog)],
         last_category=product.category,
         catalog_revision=_catalog_revision(catalog),
     )
@@ -85,12 +85,23 @@ def test_dell_under_30m_with_dedicated_gpu_filters_exactly() -> None:
     assert any("mx570a" in " ".join(product["specs"]).lower() for product in payload["products"])
 
 
-def test_focused_weight_question_reports_missing_catalog_field_without_searching_random_products() -> None:
-    state = _state_for_focus("00927992")
+def test_focused_weight_question_reports_missing_catalog_field_without_searching_random_products(
+    tmp_path, monkeypatch
+) -> None:
+    path = tmp_path / "catalog.csv"
+    path.write_text(
+        "Product Code,Product,Brand,Name,Price,LLM_Context\n"
+        "TEST0001,Laptop,Dell,Dell test model,20.000.000 VNĐ,"
+        "Sản phẩm Laptop Dell test model có CPU Core i7 và RAM 16GB.\n",
+        encoding="utf-8",
+    )
+    catalog = CatalogService(path)
+    monkeypatch.setattr("backend.api.main.get_catalog", lambda: catalog)
+    state = _state_for_focus("TEST0001", catalog)
 
     payload = _ask("may Dell ban dang noi nang bao kg", state)
     assert payload["products"]
-    assert [product["code"] for product in payload["products"]] == ["00927992"]
+    assert [product["code"] for product in payload["products"]] == ["TEST0001"]
     assert "chưa có dữ liệu trọng lượng" in payload["text"].lower()
 
 

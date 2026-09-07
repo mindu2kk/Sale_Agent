@@ -2,7 +2,18 @@
 
 from backend.agent.state import ProductConstraints
 from backend.agent.tools import get_product_field, search_products
-from backend.services.catalog import get_catalog
+from backend.services.catalog import CatalogService, get_catalog
+
+
+def _catalog_without_weight(tmp_path) -> CatalogService:
+    path = tmp_path / "catalog.csv"
+    path.write_text(
+        "Product Code,Product,Brand,Name,Price,LLM_Context\n"
+        "TEST0001,Laptop,Dell,Dell test model,20.000.000 VNĐ,"
+        "Sản phẩm Laptop Dell test model có CPU Core i7 và RAM 16GB.\n",
+        encoding="utf-8",
+    )
+    return CatalogService(path)
 
 
 def test_search_products_filters_brand_cpu_and_budget_with_schema() -> None:
@@ -74,11 +85,11 @@ def test_get_product_field_returns_known_battery_fact() -> None:
     assert "41" in field.source_text
 
 
-def test_get_product_field_returns_missing_weight_without_searching() -> None:
-    catalog = get_catalog()
-    field = get_product_field(catalog, "00927992", "weight_kg")
+def test_get_product_field_returns_missing_weight_without_searching(tmp_path) -> None:
+    catalog = _catalog_without_weight(tmp_path)
+    field = get_product_field(catalog, "TEST0001", "weight_kg")
 
-    assert field.code == "00927992"
+    assert field.code == "TEST0001"
     assert field.field == "weight_kg"
     assert field.value is None
     assert field.missing is True
