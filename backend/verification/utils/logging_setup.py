@@ -106,8 +106,11 @@ class LoggingConfigurator:
                     with open(config_file, 'r', encoding='utf-8') as f:
                         config_data = yaml.safe_load(f)
 
-                    # Extract logging configuration
-                    if "logging" in config_data:
+                    # Environment files also contain an application-level
+                    # ``logging`` section (level/feature flags). Only pass a
+                    # complete logging.config.dictConfig mapping to dictConfig.
+                    logging_section = config_data.get("logging", {})
+                    if isinstance(logging_section, dict) and logging_section.get("version") == 1:
                         return config_data
 
                 except Exception as e:

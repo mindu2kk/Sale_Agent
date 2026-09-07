@@ -12,16 +12,16 @@ logging:
   formatters:
     # JSON structured formatter for production
     structured_json:
-      class: "backend.verification.utils.logging.StructuredFormatter"
-      format: "json"
+      "()": "backend.verification.utils.logging.StructuredFormatter"
       include_correlation_id: true
       include_workflow_context: true
       include_performance_metrics: true
       
     # Human-readable formatter for development
     detailed_console:
-      format: "[{asctime}] {levelname:8} | {name:20} | {correlation_id:12} | {workflow_id:15} | {message}"
+      format: "[{asctime}] {levelname:8} | {name:35} | {message}"
       datefmt: "%Y-%m-%d %H:%M:%S"
+      style: "{"
       
     # Minimal formatter for testing
     minimal:

@@ -474,6 +474,32 @@ class TestLoggingConfiguration:
         # Get a logger and test it
         logger = configurator.get_logger("test.component")
         assert isinstance(logger, EnhancedVerificationLogger)
+
+    def test_development_config_is_dictconfig_compatible(self, capfd):
+        """Development overrides must not be passed to logging.dictConfig()."""
+        configurator = LoggingConfigurator(VerificationConfig(log_level=LogLevel.DEBUG))
+
+        config_data = configurator._load_logging_config("development")
+        assert config_data["logging"]["version"] == 1
+
+        configurator.setup_logging("development")
+        captured = capfd.readouterr()
+        assert "Failed to configure logging from config" not in captured.out
+
+    def test_malformed_versioned_config_uses_visible_fallback(self, monkeypatch, capfd):
+        """A broken dictConfig schema must not be silently accepted."""
+        configurator = LoggingConfigurator(VerificationConfig(log_level=LogLevel.DEBUG))
+        monkeypatch.setattr(
+            configurator,
+            "_load_logging_config",
+            lambda environment: {"logging": {"version": 1, "handlers": {"bad": {}}}},
+        )
+
+        configurator.setup_logging("testing")
+
+        captured = capfd.readouterr()
+        assert "Failed to configure logging from config" in captured.out
+        assert configurator._configured is True
     
     def test_workflow_logger_creation(self):
         """Test workflow-specific logger creation"""
